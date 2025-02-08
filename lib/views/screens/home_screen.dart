@@ -295,11 +295,10 @@ class HomeContent extends StatelessWidget {
         );
       },
       child: SizedBox(
-        height: 300,
         width: 100,
         child: Column(
           children: [
-            Image(image: AssetImage(imagePath), width: 70),
+            Image(image: AssetImage(imagePath), width: 63),
             const SizedBox(height: 10),
             Text(
               title,

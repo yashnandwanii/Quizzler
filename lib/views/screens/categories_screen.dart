@@ -16,7 +16,7 @@ class CategoriesScreen extends StatelessWidget {
           Image.asset(
             imageUrl,
             fit: BoxFit.cover,
-            height: 100,
+            height: 90,
           ),
           Text(title),
         ],
