@@ -10,6 +10,7 @@
 #endif
 #endif
 
+#import "dummy.h"
 #import "FLTFirebaseCorePlugin.h"
 #import "FLTFirebasePlugin.h"
 #import "FLTFirebasePluginRegistry.h"

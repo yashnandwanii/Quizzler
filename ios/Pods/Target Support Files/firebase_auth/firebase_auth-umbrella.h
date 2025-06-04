@@ -10,10 +10,6 @@
 #endif
 #endif
 
-#import "FLTAuthStateChannelStreamHandler.h"
-#import "FLTIdTokenChannelStreamHandler.h"
-#import "FLTPhoneNumberVerificationStreamHandler.h"
-#import "PigeonParser.h"
 #import "CustomPigeonHeader.h"
 #import "firebase_auth_messages.g.h"
 #import "FLTFirebaseAuthPlugin.h"

@@ -78,6 +78,9 @@ private let kCanHandleCodeInAppKey = "canHandleCodeInApp"
 /// The key for the "dynamic link domain" value in the request.
 private let kDynamicLinkDomainKey = "dynamicLinkDomain"
 
+/// The key for the "link domain" value in the request.
+private let kLinkDomainKey = "linkDomain"
+
 /// The value for the "PASSWORD_RESET" request type.
 private let kPasswordResetRequestTypeValue = "PASSWORD_RESET"
 
@@ -102,43 +105,52 @@ private let kClientType = "clientType"
 /// The key for the "recaptchaVersion" value in the request.
 private let kRecaptchaVersion = "recaptchaVersion"
 
+protocol SuppressWarning {
+  var dynamicLinkDomain: String? { get set }
+}
+
+extension ActionCodeSettings: SuppressWarning {}
+
 @available(iOS 13, tvOS 13, macOS 10.15, macCatalyst 13, watchOS 7, *)
 class GetOOBConfirmationCodeRequest: IdentityToolkitRequest, AuthRPCRequest {
   typealias Response = GetOOBConfirmationCodeResponse
 
   /// The types of OOB Confirmation Code to request.
-  let requestType: GetOOBConfirmationCodeRequestType
+  private let requestType: GetOOBConfirmationCodeRequestType
 
   /// The email of the user for password reset.
-  private(set) var email: String?
+  let email: String?
 
   /// The new email to be updated for verifyBeforeUpdateEmail.
-  private(set) var updatedEmail: String?
+  private let updatedEmail: String?
 
   /// The STS Access Token of the authenticated user for email change.
-  private(set) var accessToken: String?
+  private let accessToken: String?
 
   /// This URL represents the state/Continue URL in the form of a universal link.
-  private(set) var continueURL: String?
+  let continueURL: String?
 
   /// The iOS bundle Identifier, if available.
-  private(set) var iOSBundleID: String?
+  private let iOSBundleID: String?
 
   /// The Android package name, if available.
-  private(set) var androidPackageName: String?
+  private let androidPackageName: String?
 
   /// The minimum Android version supported, if available.
-  private(set) var androidMinimumVersion: String?
+  private let androidMinimumVersion: String?
 
   /// Indicates whether or not the Android app should be installed if not already available.
-  private(set) var androidInstallApp: Bool
+  private let androidInstallApp: Bool
 
   /// Indicates whether the action code link will open the app directly or after being
   ///   redirected from a Firebase owned web widget.
-  private(set) var handleCodeInApp: Bool
+  let handleCodeInApp: Bool
 
   /// The Firebase Dynamic Link domain used for out of band code flow.
-  private(set) var dynamicLinkDomain: String?
+  private let dynamicLinkDomain: String?
+
+  /// The Firebase Hosting domain used for out of band code flow.
+  private(set) var linkDomain: String?
 
   /// Response to the captcha.
   var captchaResponse: String?
@@ -171,7 +183,13 @@ class GetOOBConfirmationCodeRequest: IdentityToolkitRequest, AuthRPCRequest {
     androidMinimumVersion = actionCodeSettings?.androidMinimumVersion
     androidInstallApp = actionCodeSettings?.androidInstallIfNotAvailable ?? false
     handleCodeInApp = actionCodeSettings?.handleCodeInApp ?? false
-    dynamicLinkDomain = actionCodeSettings?.dynamicLinkDomain
+    dynamicLinkDomain =
+      if let actionCodeSettings {
+        (actionCodeSettings as SuppressWarning).dynamicLinkDomain
+      } else {
+        nil
+      }
+    linkDomain = actionCodeSettings?.linkDomain
 
     super.init(
       endpoint: kGetOobConfirmationCodeEndpoint,
@@ -228,7 +246,7 @@ class GetOOBConfirmationCodeRequest: IdentityToolkitRequest, AuthRPCRequest {
          requestConfiguration: requestConfiguration)
   }
 
-  func unencodedHTTPRequestBody() throws -> [String: AnyHashable] {
+  var unencodedHTTPRequestBody: [String: AnyHashable]? {
     var body: [String: AnyHashable] = [
       kRequestTypeKey: requestType.value,
     ]
@@ -273,6 +291,9 @@ class GetOOBConfirmationCodeRequest: IdentityToolkitRequest, AuthRPCRequest {
     }
     if let dynamicLinkDomain {
       body[kDynamicLinkDomainKey] = dynamicLinkDomain
+    }
+    if let linkDomain {
+      body[kLinkDomainKey] = linkDomain
     }
     if let captchaResponse {
       body[kCaptchaResponseKey] = captchaResponse

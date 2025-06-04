@@ -4,7 +4,7 @@ import 'package:get/get.dart';
 
 class MailVerificationController extends GetxController {
   late Timer _timer;
-  @override
+  
   // void onInit() {
   //   // TODO: implement onInit
   //   super.onInit();
