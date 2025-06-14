@@ -5,15 +5,18 @@ import 'package:get/get.dart';
 import 'package:lottie/lottie.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:wallpaper_app/repository/authentication_repository/authentication_repository.dart';
-
+import 'package:wallpaper_app/views/screens/home_screen.dart';
+import 'package:wallpaper_app/views/screens/profile_page.dart';
 import 'package:wallpaper_app/views/screens/quiz_splash_screen.dart';
 import 'firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-   Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform, // Correct usage
-  ).then((value)=> Get.put(AuthenticationRepository()));
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
+  Get.put(AuthenticationRepository());
 
   runApp(const MyApp());
 }
@@ -21,7 +24,6 @@ void main() async {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
@@ -36,8 +38,6 @@ class MyApp extends StatelessWidget {
     );
   }
 }
-
-
 
 class SplashScreen extends StatelessWidget {
   const SplashScreen({super.key});

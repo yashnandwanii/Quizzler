@@ -1,7 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:get/get_core/src/get_main.dart';
-import 'package:get/get_navigation/get_navigation.dart';
-import 'package:wallpaper_app/views/screens/forget_password/otp/otp.dart';
 
 class ForgotPasswordMailScreen extends StatelessWidget {
   const ForgotPasswordMailScreen({super.key});
@@ -63,9 +60,7 @@ class ForgotPasswordMailScreen extends StatelessWidget {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.black54,
                         ),
-                        onPressed: () {
-                          Get.to(() => const OtpScreen());
-                        },
+                        onPressed: () {},
                         child: const Text(
                           'Next',
                           style: TextStyle(color: Colors.white, fontSize: 24),

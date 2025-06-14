@@ -8,6 +8,7 @@ class QuizSplashScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    debugPrint('QuizSplashScreen built');
     return Scaffold(
       body: Container(
         padding: const EdgeInsets.all(20),
@@ -21,7 +22,6 @@ class QuizSplashScreen extends StatelessWidget {
             ],
           ),
         ),
-        // ignore: prefer_const_constructors
         child: SafeArea(
             child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

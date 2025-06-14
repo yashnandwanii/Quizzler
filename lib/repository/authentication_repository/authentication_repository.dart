@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:wallpaper_app/repository/authentication_repository/exceptions/signup_email_password.dart';
 import 'package:wallpaper_app/views/screens/home_screen.dart';
@@ -31,7 +32,7 @@ class AuthenticationRepository extends GetxController {
     try {
       // Validate the phone number format to ensure it's in E.164 format
       final formattedPhoneNo = phoneNo.startsWith('+') ? phoneNo : '+$phoneNo';
-      print('Attempting phone authentication with: $formattedPhoneNo');
+      debugPrint('Attempting phone authentication with: $formattedPhoneNo');
 
       await _auth.verifyPhoneNumber(
         phoneNumber: formattedPhoneNo,
@@ -41,7 +42,7 @@ class AuthenticationRepository extends GetxController {
             await _auth.signInWithCredential(credentials);
             Get.snackbar('Success', 'Phone number verified and signed in!');
           } catch (signInError) {
-            print('Sign-in error: $signInError');
+            debugPrint('Sign-in error: $signInError');
             Get.snackbar('Error', 'Failed to sign in with credentials.');
           }
         },
@@ -57,23 +58,24 @@ class AuthenticationRepository extends GetxController {
             default:
               Get.snackbar('Error', e.message ?? 'An unknown error occurred.');
           }
-          print('Verification failed: ${e.code} - ${e.message}');
+          debugPrint('Verification failed: ${e.code} - ${e.message}');
         },
         codeSent: (verificationId, resendToken) {
           // Save the verificationId to be used later for manual verification
           this.verificationId.value = verificationId;
           Get.snackbar('Info', 'OTP sent to $formattedPhoneNo');
-          print('Code sent with verificationId: $verificationId');
+          debugPrint('Code sent with verificationId: $verificationId');
         },
         codeAutoRetrievalTimeout: (verificationId) {
           // Handle auto-retrieval timeout
           this.verificationId.value = verificationId;
-          print('Auto-retrieval timeout with verificationId: $verificationId');
+          debugPrint(
+              'Auto-retrieval timeout with verificationId: $verificationId');
         },
       );
     } catch (e) {
       // Handle any unexpected errors that might occur
-      print('Unexpected phone authentication error: $e');
+      debugPrint('Unexpected phone authentication error: $e');
       Get.snackbar('Error', 'Failed to verify phone number. Please try again.');
     }
   }
@@ -89,7 +91,7 @@ class AuthenticationRepository extends GetxController {
       return credentials.user != null;
     } catch (e) {
       Get.snackbar('Error', 'Invalid OTP. Please try again.');
-      print('OTP Verification Error: $e');
+      debugPrint('OTP Verification Error: $e');
       return false;
     }
   }
@@ -109,7 +111,7 @@ class AuthenticationRepository extends GetxController {
       await _auth.signInWithEmailAndPassword(email: email, password: password);
     } on FirebaseException catch (e) {
       final ex = SignupWithEmailAndPasswordFailure.code(e.code);
-      print('Firebase Auth Exception - ${ex.message}');
+      debugPrint('Firebase Auth Exception - ${ex.message}');
       throw ex;
     }
   }
