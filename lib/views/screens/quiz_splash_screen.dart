@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:wallpaper_app/views/screens/login/login_screen.dart';
 import 'package:wallpaper_app/views/screens/signup/signup_screen.dart';
@@ -23,93 +26,107 @@ class QuizSplashScreen extends StatelessWidget {
           ),
         ),
         child: SafeArea(
+          child: Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: 10.w,
+              vertical: 15.h,
+            ),
             child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(
-              height: 10,
-            ),
-            const Image(
-              image: AssetImage('assets/image1.png'),
-            ),
-            const SizedBox(
-              height: 40,
-            ),
-            Text(
-              'Welcome to the quiz app...',
-              style: TextStyle(color: Colors.grey[200], fontSize: 18),
-            ),
-            const SizedBox(
-              height: 10,
-            ),
-            const Text(
-              'Quiz Night',
-              style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 35,
-                  fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(
-              height: 130,
-            ),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Expanded(
-                  child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        iconColor: Colors.blue,
-                        padding: const EdgeInsets.all(15),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      ),
-                      onPressed: () {
-                        Navigator.of(context).pushReplacement(
-                          PageTransition(
-                            child: const SignupScreen(),
-                            type: PageTransitionType.rightToLeft,
+                const Image(
+                  image: AssetImage('assets/image1.png'),
+                ),
+                SizedBox(
+                  height: 30.h,
+                ),
+                Text(
+                  'Welcome to ',
+                  style: GoogleFonts.robotoMono(
+                    color: Colors.grey[200],
+                    fontSize: 13.h,
+                  ),
+                ),
+                SizedBox(
+                  height: 10.h,
+                ),
+                Text(
+                  'Quizzler',
+                  style: GoogleFonts.robotoMono(
+                    color: Colors.blue.shade300,
+                    fontSize: 40.sp,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                SizedBox(
+                  height: 100.h,
+                ),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          iconColor: Colors.blue,
+                          padding: const EdgeInsets.all(15),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
                           ),
-                        );
-                      },
-                      child: const Text(
-                        'SIGNUP',
-                        style: TextStyle(
+                        ),
+                        onPressed: () {
+                          Get.to(
+                            const SignupScreen(),
+                            transition: Transition.rightToLeft,
+                            duration: const Duration(milliseconds: 500),
+                          );
+                        },
+                        child: Text(
+                          'S I G N  U P',
+                          style: TextStyle(
                             color: Colors.blue,
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold),
-                      )),
-                ),
-                const SizedBox(
-                  width: 10,
-                ),
-                Expanded(
-                  child: OutlinedButton(
-                      style: ElevatedButton.styleFrom(
-                        iconColor: Colors.blue,
-                        padding: const EdgeInsets.all(15),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
+                            fontSize: 14.sp,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
-                      onPressed: () {
-                        Navigator.of(context).pushReplacement(
-                          PageTransition(
-                            child: const LoginScreen(),
-                            type: PageTransitionType.rightToLeft,
+                    ),
+                    SizedBox(
+                      width: 10.h,
+                    ),
+                    Expanded(
+                      child: OutlinedButton(
+                        style: ElevatedButton.styleFrom(
+                          iconColor: Colors.blue,
+                          padding: const EdgeInsets.all(15),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
                           ),
-                        );
-                      },
-                      child: const Text(
-                        'LOGIN',
-                        style: TextStyle(color: Colors.blue, fontSize: 16),
-                      )),
-                ),
+                        ),
+                        onPressed: () {
+                          Get.to(
+                            const LoginScreen(),
+                            transition: Transition.rightToLeft,
+                            duration: const Duration(milliseconds: 500),
+                          );
+                        },
+                        child: Text(
+                          'L O G I N',
+                          style: TextStyle(
+                            color: Colors.blue,
+                            fontSize: 14.sp,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                )
               ],
-            )
-          ],
-        )),
+            ),
+          ),
+        ),
       ),
     );
   }

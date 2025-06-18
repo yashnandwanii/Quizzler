@@ -76,10 +76,10 @@ class SignUpForm extends StatelessWidget {
               ),
               onPressed: () {
                 if (formKey.currentState!.validate()) {
-                  controller.registerUser(
-                    controller.email.text.trim(),
-                    controller.password.text.trim(),
-                  );
+                  // controller.registerUser(
+                  //   controller.email.text.trim(),
+                  //   controller.password.text.trim(),
+                  // );
                   // controller
                   //     .phoneAuthentication(controller.phoneNo.text.trim());
                   // Navigator.push(

@@ -1,8 +1,8 @@
 // This is a generated file; do not edit or check into version control.
 FLUTTER_ROOT=/Users/yashnandwani/Developer/flutter
-FLUTTER_APPLICATION_PATH=/Users/yashnandwani/Developer/Flutter_Projects/Quiz App
+FLUTTER_APPLICATION_PATH=/Users/yashnandwani/Developer/Flutter_Projects/Quiz-App/Quiz App
 COCOAPODS_PARALLEL_CODE_SIGN=true
-FLUTTER_TARGET=/Users/yashnandwani/Developer/Flutter_Projects/Quiz App/lib/main.dart
+FLUTTER_TARGET=/Users/yashnandwani/Developer/Flutter_Projects/Quiz-App/Quiz App/lib/main.dart
 FLUTTER_BUILD_DIR=build
 FLUTTER_BUILD_NAME=1.0.0
 FLUTTER_BUILD_NUMBER=1
@@ -12,4 +12,4 @@ DART_DEFINES=RkxVVFRFUl9WRVJTSU9OPTMuMzIuMg==,RkxVVFRFUl9DSEFOTkVMPXN0YWJsZQ==,R
 DART_OBFUSCATION=false
 TRACK_WIDGET_CREATION=true
 TREE_SHAKE_ICONS=false
-PACKAGE_CONFIG=/Users/yashnandwani/Developer/Flutter_Projects/Quiz App/.dart_tool/package_config.json
+PACKAGE_CONFIG=/Users/yashnandwani/Developer/Flutter_Projects/Quiz-App/Quiz App/.dart_tool/package_config.json

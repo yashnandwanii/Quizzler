@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:wallpaper_app/views/screens/update_profile.dart';
 import 'package:wallpaper_app/views/widgets/profile_screen_widget.dart';
 
 class ProfileScreen extends StatelessWidget {
@@ -48,11 +47,7 @@ class ProfileScreen extends StatelessWidget {
                       child: IconButton(
                         tooltip: 'Edit Profile',
                         onPressed: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (context) =>  UpdateProfilePage(),
-                            ),
-                          );
+                          
                         },
                         icon: const Icon(Icons.edit),
                       ),
@@ -76,11 +71,7 @@ class ProfileScreen extends StatelessWidget {
                     backgroundColor: WidgetStateProperty.all(Colors.blue),
                   ),
                   onPressed: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) =>  UpdateProfilePage(),
-                      ),
-                    );
+                    
                   },
                   child: const Text(
                     'Edit Profile',
