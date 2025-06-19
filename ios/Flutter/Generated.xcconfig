@@ -1,15 +1,16 @@
 // This is a generated file; do not edit or check into version control.
 FLUTTER_ROOT=/Users/yashnandwani/Developer/flutter
-FLUTTER_APPLICATION_PATH=/Users/yashnandwani/Developer/Flutter_Projects/Quiz-App/Quiz App
+FLUTTER_APPLICATION_PATH=/Users/yashnandwani/Developer/Flutter_Projects/Quiz-App/Quiz-App
 COCOAPODS_PARALLEL_CODE_SIGN=true
-FLUTTER_TARGET=/Users/yashnandwani/Developer/Flutter_Projects/Quiz-App/Quiz App/lib/main.dart
+FLUTTER_TARGET=/Users/yashnandwani/Developer/Flutter_Projects/Quiz-App/Quiz-App/lib/main.dart
 FLUTTER_BUILD_DIR=build
 FLUTTER_BUILD_NAME=1.0.0
 FLUTTER_BUILD_NUMBER=1
+FLUTTER_CLI_BUILD_MODE=debug
 EXCLUDED_ARCHS[sdk=iphonesimulator*]=i386
 EXCLUDED_ARCHS[sdk=iphoneos*]=armv7
-DART_DEFINES=RkxVVFRFUl9WRVJTSU9OPTMuMzIuMg==,RkxVVFRFUl9DSEFOTkVMPXN0YWJsZQ==,RkxVVFRFUl9HSVRfVVJMPWh0dHA6Ly9naXRodWIuY29tL2ZsdXR0ZXIvZmx1dHRlci5naXQ=,RkxVVFRFUl9GUkFNRVdPUktfUkVWSVNJT049OGRlZmFhNzFhNw==,RkxVVFRFUl9FTkdJTkVfUkVWSVNJT049MTA5MTUwODkzOQ==,RkxVVFRFUl9EQVJUX1ZFUlNJT049My44LjE=
+DART_DEFINES=RkxVVFRFUl9WRVJTSU9OPTMuMzMuMC0xLjAucHJlLjU4Nw==,RkxVVFRFUl9DSEFOTkVMPW1hc3Rlcg==,RkxVVFRFUl9HSVRfVVJMPWh0dHA6Ly9naXRodWIuY29tL2ZsdXR0ZXIvZmx1dHRlci5naXQ=,RkxVVFRFUl9GUkFNRVdPUktfUkVWSVNJT049NDRjNmUwNjVkNw==,RkxVVFRFUl9FTkdJTkVfUkVWSVNJT049NDRjNmUwNjVkNw==,RkxVVFRFUl9EQVJUX1ZFUlNJT049My45LjAgKGJ1aWxkIDMuOS4wLTI1MS4wLmRldik=
 DART_OBFUSCATION=false
 TRACK_WIDGET_CREATION=true
 TREE_SHAKE_ICONS=false
-PACKAGE_CONFIG=/Users/yashnandwani/Developer/Flutter_Projects/Quiz-App/Quiz App/.dart_tool/package_config.json
+PACKAGE_CONFIG=/Users/yashnandwani/Developer/Flutter_Projects/Quiz-App/Quiz-App/.dart_tool/package_config.json

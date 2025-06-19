@@ -97,24 +97,40 @@ NS_ASSUME_NONNULL_END
 #define GTM_TARGET_SUPPORTS_APP_TRANSPORT_SECURITY 1
 #endif
 
-#if TARGET_OS_IOS
-#if defined(__IPHONE_13_0) && __IPHONE_OS_VERSION_MIN_REQUIRED >= __IPHONE_13_0
+#if ((defined(TARGET_OS_MACCATALYST) && TARGET_OS_MACCATALYST) ||                                 \
+     (TARGET_OS_OSX && defined(__MAC_10_15) && __MAC_OS_X_VERSION_MIN_REQUIRED >= __MAC_10_15) || \
+     (TARGET_OS_IOS && defined(__IPHONE_13_0) &&                                                  \
+      __IPHONE_OS_VERSION_MIN_REQUIRED >= __IPHONE_13_0) ||                                       \
+     (TARGET_OS_WATCH && defined(__WATCHOS_6_0) &&                                                \
+      __WATCH_OS_VERSION_MIN_REQUIRED >= __WATCHOS_6_0) ||                                        \
+     (TARGET_OS_TV && defined(__TVOS_13_0) && __TVOS_VERSION_MIN_REQUIRED >= __TVOS_13_0) ||      \
+     (defined(TARGET_OS_VISION) && TARGET_OS_VISION))
 #define GTM_SDK_REQUIRES_TLSMINIMUMSUPPORTEDPROTOCOLVERSION 1
+#define GTM_SDK_SUPPORTS_TLSMINIMUMSUPPORTEDPROTOCOLVERSION 1
+#elif ((TARGET_OS_OSX && defined(__MAC_10_15) && __MAC_OS_X_VERSION_MAX_ALLOWED >= __MAC_10_15) || \
+       (TARGET_OS_IOS && defined(__IPHONE_13_0) &&                                                 \
+        __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_13_0) ||                                       \
+       (TARGET_OS_WATCH && defined(__WATCHOS_6_0) &&                                               \
+        __WATCH_OS_VERSION_MAX_ALLOWED >= __WATCHOS_6_0) ||                                        \
+       (TARGET_OS_TV && defined(__TVOS_13_0) && __TVOS_VERSION_MAX_ALLOWED >= __TVOS_13_0))
+#define GTM_SDK_REQUIRES_TLSMINIMUMSUPPORTEDPROTOCOLVERSION 0
+#define GTM_SDK_SUPPORTS_TLSMINIMUMSUPPORTEDPROTOCOLVERSION 1
 #else
 #define GTM_SDK_REQUIRES_TLSMINIMUMSUPPORTEDPROTOCOLVERSION 0
-#endif
-#else  // Not iOS
-#define GTM_SDK_REQUIRES_TLSMINIMUMSUPPORTEDPROTOCOLVERSION 1
+#define GTM_SDK_SUPPORTS_TLSMINIMUMSUPPORTEDPROTOCOLVERSION 0
 #endif
 
-#if TARGET_OS_IOS
-#if defined(__IPHONE_13_0) && __IPHONE_OS_VERSION_MIN_REQUIRED >= __IPHONE_13_0
+#if ((defined(TARGET_OS_MACCATALYST) && TARGET_OS_MACCATALYST) ||                                 \
+     (TARGET_OS_OSX && defined(__MAC_10_15) && __MAC_OS_X_VERSION_MIN_REQUIRED >= __MAC_10_15) || \
+     (TARGET_OS_IOS && defined(__IPHONE_13_0) &&                                                  \
+      __IPHONE_OS_VERSION_MIN_REQUIRED >= __IPHONE_13_0) ||                                       \
+     (TARGET_OS_WATCH && defined(__WATCHOS_6_0) &&                                                \
+      __WATCH_OS_VERSION_MIN_REQUIRED >= __WATCHOS_6_0) ||                                        \
+     (TARGET_OS_TV && defined(__TVOS_13_0) && __TVOS_VERSION_MIN_REQUIRED >= __TVOS_13_0) ||      \
+     (defined(TARGET_OS_VISION) && TARGET_OS_VISION))
 #define GTM_SDK_REQUIRES_SECTRUSTEVALUATEWITHERROR 1
 #else
 #define GTM_SDK_REQUIRES_SECTRUSTEVALUATEWITHERROR 0
-#endif
-#else  // Not iOS
-#define GTM_SDK_REQUIRES_SECTRUSTEVALUATEWITHERROR 1
 #endif
 
 #if __has_attribute(swift_async)
@@ -123,21 +139,6 @@ NS_ASSUME_NONNULL_END
 #else
 #define GTM_SWIFT_DISABLE_ASYNC
 #endif
-
-// Internal tracking of the state within the `-beginFetch...` flow.
-typedef NS_ENUM(NSUInteger, GTMSessionFetcherStartingState) {
-  // Not in any explcit part of the startup flow or about the re-enter the flow.
-  kStartingStateNone = 0,
-
-  // Parts of startup that can result in the fetcher completing startup at some later time.
-  kStartingStateServiceDelayed,
-  kStartingStateCalculatingUA,
-  kStartingStateAuthorizing,
-  kStartingStateApplyingDecorators,
-
-  // State while actively in `-beginFetchMayDelay:mayAuthorize:mayDecorate:`.
-  kStartingStateStartingUp,
-};
 
 @interface GTMSessionFetcher ()
 
@@ -254,9 +255,6 @@ static GTMSessionFetcherTestBlock _Nullable gGlobalTestBlock;
                                    // initial beginFetch
   NSDate *_initialRequestDate;     // date of first request to the target server (ignoring auth)
   BOOL _hasAttemptedAuthRefresh;   // accessed only in shouldRetryNowForStatus:
-
-  GTMSessionFetcherStartingState _startingState;
-  NSUInteger _pendingNotifications;
 
   NSString *_comment;  // comment for log
   NSString *_log;
@@ -499,68 +497,14 @@ static GTMSessionFetcherTestBlock _Nullable gGlobalTestBlock;
   [self beginFetchWithCompletionHandler:handler];
 }
 
-// Helper to enter a new StartingState. If the fetch has already been stopped, then it will trigger
-// a needed callback instead of setting the state. It returns YES/NO based on if starting up of the
-// fetch should continue.
-- (BOOL)startingState:(GTMSessionFetcherStartingState)newState __attribute__((objc_direct)) {
-  BOOL stopped = NO;
-  @synchronized(self) {
-    GTMSessionMonitorSynchronized(self);
-
-    GTMSESSION_ASSERT_DEBUG(
-        (_startingState == kStartingStateNone || _startingState == kStartingStateStartingUp),
-        @"Unexpected starting state: %lu", (unsigned long)_startingState);
-
-    if (_userStoppedFetching) {
-      stopped = YES;
-    } else {
-      _startingState = newState;
-    }
-  }
-  if (stopped) {
-    // We end up here if someone calls `stopFetching` from another thread/queue while
-    // the fetch was being started up, so while `stopFetching` did the needed shutdown
-    // we have to ensure the requested callback was triggered.
-    if (self.stopFetchingTriggersCompletionHandler) {
-      NSError *error = [NSError errorWithDomain:kGTMSessionFetcherErrorDomain
-                                           code:GTMSessionFetcherErrorUserCancelled
-                                       userInfo:nil];
-      [self failToBeginFetchWithError:error];
-    } else {
-      // In the edge case where the fetch was stopped before it even began, the call backs still
-      // need to get cleared as at least the completion will have been just set in calling
-      // beginFetch...
-      [self stopFetchReleasingCallbacks:YES];
-    }
-    return NO;  // Caller to stop.
-  }
-  return YES;
-}
-
-// This is a private callback from the service to restart the fetcher after it was delayed
-// due to the per host throttling.
-- (void)serviceRestartingFetcher {
-  // Reset the starting state since the fetch is getting restarted.
-  @synchronized(self) {
-    GTMSessionMonitorSynchronized(self);
-    _startingState = kStartingStateNone;
-  }
-  [self beginFetchMayDelay:NO mayAuthorize:YES mayDecorate:YES];
-}
-
 - (void)beginFetchMayDelay:(BOOL)mayDelay
               mayAuthorize:(BOOL)mayAuthorize
                mayDecorate:(BOOL)mayDecorate {
   // This is the internal entry point for re-starting fetches.
   GTMSessionCheckNotSynchronized(self);
 
-  if (![self startingState:kStartingStateStartingUp]) {
-    return;
-  }
-
-  // The request property is now externally immutable.
-  NSMutableURLRequest *fetchRequest = _request;
-
+  NSMutableURLRequest *fetchRequest =
+      _request;  // The request property is now externally immutable.
   NSURL *fetchRequestURL = fetchRequest.URL;
   NSString *priorSessionIdentifier = self.sessionIdentifier;
 
@@ -699,7 +643,7 @@ static GTMSessionFetcherTestBlock _Nullable gGlobalTestBlock;
         return;
       }
     }  // !isSecure
-  }  // (requestURL != nil) && !isDataRequest
+  }    // (requestURL != nil) && !isDataRequest
 
   if (self.cookieStorage == nil) {
     self.cookieStorage = [[self class] staticCookieStorage];
@@ -758,42 +702,16 @@ static GTMSessionFetcherTestBlock _Nullable gGlobalTestBlock;
     mayDelay = NO;
   }
   if (mayDelay && _service) {
-    // Set the delayed state so there can't be a race between it getting queued in the
-    // `fetcherShouldBeginFetching:` call and some other thread completing a different fetch and
-    // thus starting this one. If we were trying to set the state based on the return result, there
-    // would be a small window for that race.
-    if (![self startingState:kStartingStateServiceDelayed]) {
-      return;
-    }
-
     BOOL shouldFetchNow = [_service fetcherShouldBeginFetching:self];
     if (!shouldFetchNow) {
       // The fetch is deferred, but will happen later.
       //
       // If this session is held by the fetcher service, clear the session now so that we don't
       // assume it's still valid after the fetcher is restarted.
-      //
-      // NOTE: In hindsight, this could be a race, some other thread could be starting it while
-      // doing these checks/work, but it also doesn't seem safe to put the whole block in a
-      // since `@synchronized(self)` block.
       if (self.canShareSession) {
         self.session = nil;
       }
       return;
-    }
-
-    @synchronized(self) {
-      GTMSessionMonitorSynchronized(self);
-
-      // If a `-stopFetching` came in while the service check was made, then the side effect of the
-      // state setting caused the handler (if needed) to already be made, so there we want to just
-      // exit and not continue the fetch.
-      if (_userStoppedFetching) {
-        return;
-      }
-
-      // Per comment above, correct state since it wasn't delayed, go back to startup state.
-      _startingState = kStartingStateStartingUp;
     }
   }
 
@@ -807,6 +725,7 @@ static GTMSessionFetcherTestBlock _Nullable gGlobalTestBlock;
       // The User-Agent is not cached in memory. Fetch it asynchronously.
       [self updateUserAgentAsynchronouslyForRequest:fetchRequest
                                   userAgentProvider:userAgentProvider
+                                           mayDelay:mayDelay
                                        mayAuthorize:mayAuthorize
                                         mayDecorate:mayDecorate];
       // This method can't continue until the User-Agent header is fetched. The above
@@ -889,16 +808,7 @@ static GTMSessionFetcherTestBlock _Nullable gGlobalTestBlock;
     }
   }
 
-  // Even though the StartingUp state was entered at the start of the function, we re-enter it here
-  // in case a call to `-stopFetcher` comes in on another thread while the above code was running,
-  // this lets
-  // `-startingState:` do the needed checks/callbacks/cleanups without repeating them here.
-  if (![self startingState:kStartingStateStartingUp]) {
-    return;
-  }
-
   // finally, start the connection
-
   NSURLSessionTask *newSessionTask;
   BOOL needsDataAccumulator = NO;
   if (_downloadResumeData) {
@@ -996,12 +906,10 @@ static GTMSessionFetcherTestBlock _Nullable gGlobalTestBlock;
                          // UIApplication on the main thread.
                          UIBackgroundTaskIdentifier localTaskID;
                          @synchronized(self) {
-                           GTMSessionMonitorSynchronized(self);
                            localTaskID = guardedTaskID;
                          }
                          if (localTaskID != UIBackgroundTaskInvalid) {
                            @synchronized(self) {
-                             GTMSessionMonitorSynchronized(self);
                              if (localTaskID == self.backgroundTaskIdentifier) {
                                self.backgroundTaskIdentifier = UIBackgroundTaskInvalid;
                              }
@@ -1010,7 +918,6 @@ static GTMSessionFetcherTestBlock _Nullable gGlobalTestBlock;
                          }
                        }];
     @synchronized(self) {
-      GTMSessionMonitorSynchronized(self);
       guardedTaskID = returnedTaskID;
       self.backgroundTaskIdentifier = returnedTaskID;
     }
@@ -1030,7 +937,9 @@ static GTMSessionFetcherTestBlock _Nullable gGlobalTestBlock;
 
   [self setStopNotificationNeeded:YES];
 
-  [self postNotificationOnMainThreadWithName:kGTMSessionFetcherStartedNotification userInfo:nil];
+  [self postNotificationOnMainThreadWithName:kGTMSessionFetcherStartedNotification
+                                    userInfo:nil
+                                requireAsync:NO];
 
   // The service needs to know our task if it is serving as NSURLSession delegate.
   [_service fetcherDidBeginFetching:self];
@@ -1046,30 +955,6 @@ static GTMSessionFetcherTestBlock _Nullable gGlobalTestBlock;
     // and we don't want to post a start notification after a premature finish
     // of the session task.
     [newSessionTask resume];
-  }
-
-  BOOL stopped;
-  @synchronized(self) {
-    GTMSessionMonitorSynchronized(self);
-    stopped = _userStoppedFetching;
-    if (!stopped) {
-      _startingState = kStartingStateNone;
-    }
-  }
-  // If a `-stopFetching` came in between where the connection was finally started (see above), then
-  // `-stopFetching` itself didn't do anything because it would be a race, so we have to trigger
-  // the cleanup work here manually.
-  //
-  if (stopped) {
-    if (self.stopFetchingTriggersCompletionHandler) {
-      NSError *error = [NSError errorWithDomain:kGTMSessionFetcherErrorDomain
-                                           code:GTMSessionFetcherErrorUserCancelled
-                                       userInfo:nil];
-      // Fetch started, can't use `-failToBeginFetchWithError:`.
-      [self finishWithError:error shouldRetry:NO];
-    } else {
-      [self stopFetchReleasingCallbacks:YES];
-    }
   }
 }
 
@@ -1099,12 +984,14 @@ static GTMSessionFetcherTestBlock _Nullable gGlobalTestBlock;
 #if !GTM_ALLOW_INSECURE_REQUESTS
 #if GTM_SDK_REQUIRES_TLSMINIMUMSUPPORTEDPROTOCOLVERSION
     _configuration.TLSMinimumSupportedProtocolVersion = tls_protocol_version_TLSv12;
-#else
-    if (@available(iOS 13, *)) {
+#elif GTM_SDK_SUPPORTS_TLSMINIMUMSUPPORTEDPROTOCOLVERSION
+    if (@available(iOS 13, tvOS 13, macOS 10.15, *)) {
       _configuration.TLSMinimumSupportedProtocolVersion = tls_protocol_version_TLSv12;
     } else {
       _configuration.TLSMinimumSupportedProtocol = kTLSProtocol12;
     }
+#else
+    _configuration.TLSMinimumSupportedProtocol = kTLSProtocol12;
 #endif  // GTM_SDK_REQUIRES_TLSMINIMUMSUPPORTEDPROTOCOLVERSION
 #endif
   }  // !_configuration
@@ -1142,15 +1029,11 @@ static GTMSessionFetcherTestBlock _Nullable gGlobalTestBlock;
 // sets it in |fetchRequest| and continues the request.
 - (void)updateUserAgentAsynchronouslyForRequest:(NSMutableURLRequest *)fetchRequest
                               userAgentProvider:(id<GTMUserAgentProvider>)userAgentProvider
+                                       mayDelay:(BOOL)mayDelay
                                    mayAuthorize:(BOOL)mayAuthorize
                                     mayDecorate:(BOOL)mayDecorate {
   GTMSESSION_LOG_DEBUG_VERBOSE(
       @"GTMSessionFetcher fetching User-Agent from GTMUserAgentProvider %@...", _userAgentProvider);
-
-  if (![self startingState:kStartingStateCalculatingUA]) {
-    return;
-  }
-
   __weak __typeof__(self) weakSelf = self;
   dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
     __strong __typeof__(self) strongSelf = weakSelf;
@@ -1165,17 +1048,23 @@ static GTMSessionFetcherTestBlock _Nullable gGlobalTestBlock;
                             @"GTMUserAgentProvider %@ should have cached user agent now that it's "
                             @"calculated, but returned nil",
                             userAgentProvider);
+    BOOL shouldStop;
     @synchronized(strongSelf) {
       GTMSessionMonitorSynchronized(strongSelf);
-      // If `stopFetching` was called, do nothing, since the fetch was in a delay state
-      // any needed callback already happened.
-      if (strongSelf->_userStoppedFetching) {
-        return;
-      }
       [strongSelf->_request setValue:userAgent forHTTPHeaderField:@"User-Agent"];
-      strongSelf->_startingState = kStartingStateNone;
+      shouldStop = strongSelf->_userStoppedFetching;
     }
-    [strongSelf beginFetchMayDelay:NO mayAuthorize:mayAuthorize mayDecorate:mayDecorate];
+    if (shouldStop) {
+      NSError *error = [NSError errorWithDomain:kGTMSessionFetcherErrorDomain
+                                           code:GTMSessionFetcherErrorUserCancelled
+                                       userInfo:nil];
+      [strongSelf invokeFetchCallbacksOnCallbackQueueWithData:nil
+                                                        error:error
+                                                  mayDecorate:NO
+                                       shouldReleaseCallbacks:YES];
+    } else {
+      [strongSelf beginFetchMayDelay:mayDelay mayAuthorize:mayAuthorize mayDecorate:mayDecorate];
+    }
   });
 }
 
@@ -1664,39 +1553,18 @@ NSData *_Nullable GTMDataFromInputStream(NSInputStream *inputStream, NSError **o
   }  // @synchronized(self)
 }
 
-- (nullable NSDictionary<NSString *, NSString *> *)sessionUserInfo {
+- (nullable NSDictionary *)sessionUserInfo {
   @synchronized(self) {
     GTMSessionMonitorSynchronized(self);
 
     if (_sessionUserInfo == nil) {
       // We'll return the metadata dictionary with internal keys removed. This avoids the user
       // re-using the userInfo dictionary later and accidentally including the internal keys.
-      // Just incase something got corrupted in storage and parsed back out differently, ensure
-      // the api contract on types is still valid.
       NSMutableDictionary *metadata = [[self sessionIdentifierMetadataUnsynchronized] mutableCopy];
       NSSet *keysToRemove = [metadata keysOfEntriesPassingTest:^BOOL(id key, id obj, BOOL *stop) {
-        return ![key isKindOfClass:[NSString class]] || ![obj isKindOfClass:[NSString class]] ||
-               [key hasPrefix:@"_"];
+        return [key hasPrefix:@"_"];
       }];
-#if DEBUG
-      // If we're pruning, give warnings about the things that were invalid as some bug has slipped
-      // through.
-      if (keysToRemove.count) {
-        [metadata enumerateKeysAndObjectsUsingBlock:^(id _Nonnull key, id _Nonnull obj,
-                                                      BOOL *_Nonnull stop) {
-          if (![key isKindOfClass:[NSString class]]) {
-            GTMSESSION_LOG_DEBUG(
-                @"InternalError: restoring sessionUserInfo is pruning a non String key: %@", key);
-          } else if (![obj isKindOfClass:[NSString class]]) {
-            GTMSESSION_LOG_DEBUG(
-                @"InternalError: restoring sessionUserInfo is pruning a non String value: %@: %@",
-                key, obj);
-          }
-        }];
-      }
-#endif  // DEBUG
       [metadata removeObjectsForKeys:[keysToRemove allObjects]];
-
       if (metadata.count > 0) {
         _sessionUserInfo = metadata;
       }
@@ -1705,26 +1573,7 @@ NSData *_Nullable GTMDataFromInputStream(NSInputStream *inputStream, NSError **o
   }  // @synchronized(self)
 }
 
-- (void)setSessionUserInfo:(nullable NSDictionary<NSString *, NSString *> *)dictionary {
-  [dictionary enumerateKeysAndObjectsUsingBlock:^(id _Nonnull key, id _Nonnull obj,
-                                                  BOOL *_Nonnull stop) {
-    if (![key isKindOfClass:[NSString class]]) {
-      [NSException raise:NSInvalidArgumentException
-                  format:@"sessionUserInfo keys must be NSStrings: %@", key];
-    }
-    if ([key hasPrefix:@"_"]) {
-      [NSException
-           raise:NSInvalidArgumentException
-          format:
-              @"sessionUserInfo keys starting with an underscore are reserved for the library: %@",
-              key];
-    }
-    if (![obj isKindOfClass:[NSString class]]) {
-      [NSException raise:NSInvalidArgumentException
-                  format:@"Values in sessionUserInfo must be NSStrings: %@: %@", key, obj];
-    }
-  }];
-
+- (void)setSessionUserInfo:(nullable NSDictionary *)dictionary {
   @synchronized(self) {
     GTMSessionMonitorSynchronized(self);
 
@@ -1819,61 +1668,15 @@ NSData *_Nullable GTMDataFromInputStream(NSInputStream *inputStream, NSError **o
     _sessionIdentifierUUID = [[NSUUID UUID] UUIDString];
     _sessionIdentifier =
         [NSString stringWithFormat:@"%@_%@", kGTMSessionIdentifierPrefix, _sessionIdentifierUUID];
-
     // Start with user-supplied keys so they cannot accidentally override the fetcher's keys.
     NSMutableDictionary *metadataDict =
         [NSMutableDictionary dictionaryWithDictionary:(NSDictionary *_Nonnull)_sessionUserInfo];
 
-    // sessionUserInfo was declared as `strong` (not `copy`), so it could have been modifed after
-    // having been set. So remove anything that breaks the contract.
-    NSSet *keysToRemove = [metadataDict keysOfEntriesPassingTest:^BOOL(id key, id obj, BOOL *stop) {
-      return ![key isKindOfClass:[NSString class]] || ![obj isKindOfClass:[NSString class]] ||
-             [key hasPrefix:@"_"];
-    }];
-#if DEBUG
-    // If we're pruning, give warnings about the things that were invalid as some bug has slipped
-    // through.
-    if (keysToRemove.count) {
-      [metadataDict enumerateKeysAndObjectsUsingBlock:^(id _Nonnull key, id _Nonnull obj,
-                                                        BOOL *_Nonnull stop) {
-        if (![key isKindOfClass:[NSString class]]) {
-          GTMSESSION_LOG_DEBUG(
-              @"Warning: sessionUserInfo has been modifed to include a non String key: %@", key);
-        } else if (![obj isKindOfClass:[NSString class]]) {
-          GTMSESSION_LOG_DEBUG(
-              @"Warning: sessionUserInfo has been modifed to include a non String value: %@: %@",
-              key, obj);
-        }
-      }];
-    }
-#endif  // DEBUG
-    [metadataDict removeObjectsForKeys:[keysToRemove allObjects]];
-
     if (metadataToInclude) {
-#if DEBUG
-      [metadataToInclude enumerateKeysAndObjectsUsingBlock:^(id _Nonnull key, id _Nonnull obj,
-                                                             BOOL *_Nonnull stop) {
-        GTMSESSION_ASSERT_DEBUG([key isKindOfClass:[NSString class]],
-                                @"metadataToInclude keys must be NSStrings: %@", key);
-        GTMSESSION_ASSERT_DEBUG([key hasPrefix:@"_"],
-                                @"metadataToInclude should only have prefixed keys: %@ - %@", key,
-                                obj);
-      }];
-#endif
       [metadataDict addEntriesFromDictionary:(NSDictionary *)metadataToInclude];
     }
     NSDictionary *defaultMetadataDict = [self sessionIdentifierDefaultMetadata];
     if (defaultMetadataDict) {
-#if DEBUG
-      [defaultMetadataDict enumerateKeysAndObjectsUsingBlock:^(id _Nonnull key, id _Nonnull obj,
-                                                               BOOL *_Nonnull stop) {
-        GTMSESSION_ASSERT_DEBUG([key isKindOfClass:[NSString class]],
-                                @"defaultMetadataDict keys must be NSStrings: %@", key);
-        GTMSESSION_ASSERT_DEBUG([key hasPrefix:@"_"],
-                                @"defaultMetadataDict should only have prefixed keys: %@ - %@", key,
-                                obj);
-      }];
-#endif
       [metadataDict addEntriesFromDictionary:defaultMetadataDict];
     }
     if (metadataDict.count > 0) {
@@ -1934,8 +1737,6 @@ NSData *_Nullable GTMDataFromInputStream(NSInputStream *inputStream, NSError **o
   // we need to tell UIApplication we're done.
   UIBackgroundTaskIdentifier bgTaskID;
   @synchronized(self) {
-    GTMSessionMonitorSynchronized(self);
-
     bgTaskID = self.backgroundTaskIdentifier;
     if (bgTaskID != UIBackgroundTaskInvalid) {
       self.backgroundTaskIdentifier = UIBackgroundTaskInvalid;
@@ -1952,10 +1753,6 @@ NSData *_Nullable GTMDataFromInputStream(NSInputStream *inputStream, NSError **o
 
 - (void)authorizeRequest {
   GTMSessionCheckNotSynchronized(self);
-
-  if (![self startingState:kStartingStateAuthorizing]) {
-    return;
-  }
 
   id authorizer = self.authorizer;
   // Prefer the block-based implementation. This *is* a change in behavior, but if authorizers
@@ -1977,12 +1774,9 @@ NSData *_Nullable GTMDataFromInputStream(NSInputStream *inputStream, NSError **o
     [authorizer authorizeRequest:mutableRequest delegate:self didFinishSelector:callbackSel];
   } else {
     GTMSESSION_ASSERT_DEBUG(authorizer == nil, @"invalid authorizer for fetch");
-    // Should really never get here the main flow shouldn't have called here if there
-    // wasn't an authorizer, but for safety sake, continue on through the starting process.
-    @synchronized(self) {
-      GTMSessionMonitorSynchronized(self);
-      _startingState = kStartingStateNone;
-    }
+
+    // No authorizing possible, and authorizing happens only after any delay;
+    // just begin fetching
     [self beginFetchMayDelay:NO mayAuthorize:NO mayDecorate:YES];
   }
 }
@@ -1995,28 +1789,13 @@ NSData *_Nullable GTMDataFromInputStream(NSInputStream *inputStream, NSError **o
     finishedWithError:(nullable NSError *)error {
   GTMSessionCheckNotSynchronized(self);
 
-  @synchronized(self) {
-    GTMSessionMonitorSynchronized(self);
-
-    // If `stopFetching` was called, do nothing, since the fetch was in a delay state
-    // any needed callback already happened.
-    if (_userStoppedFetching) {
-      return;
-    }
-    if (error == nil) {
-      _request = authorizedRequest;
-      // Clear the delay state only if things aren't about to fail. Don't want to have a race
-      // between clearing the state and when the error is posted because some other thread happened
-      // to get in a call to
-      // `-stopFetching`.
-      _startingState = kStartingStateNone;
-    }
-  }  // @synchronized(self)
-
   if (error != nil) {
     // We can't fetch without authorization
     [self failToBeginFetchWithError:(NSError *_Nonnull)error];
   } else {
+    @synchronized(self) {
+      _request = authorizedRequest;
+    }
     [self beginFetchMayDelay:NO mayAuthorize:NO mayDecorate:YES];
   }
 }
@@ -2027,18 +1806,8 @@ NSData *_Nullable GTMDataFromInputStream(NSInputStream *inputStream, NSError **o
   if (index >= decorators.count) {
     GTMSESSION_LOG_DEBUG_VERBOSE(
         @"GTMSessionFetcher decorate requestWillStart %zu decorators complete", decorators.count);
-    @synchronized(self) {
-      GTMSessionMonitorSynchronized(self);
-      _startingState = kStartingStateNone;
-    }
     [self beginFetchMayDelay:NO mayAuthorize:NO mayDecorate:NO];
     return;
-  }
-
-  if (index == 0) {
-    if (![self startingState:kStartingStateApplyingDecorators]) {
-      return;
-    }
   }
 
   __weak __typeof__(self) weakSelf = self;
@@ -2047,59 +1816,30 @@ NSData *_Nullable GTMDataFromInputStream(NSInputStream *inputStream, NSError **o
       @"GTMSessionFetcher decorate requestWillStart %zu decorators, index %zu, "
       @"retry count %zu, decorator %@",
       decorators.count, index, self.retryCount, decorator);
-  [decorator
-       fetcherWillStart:self
-      completionHandler:^(NSURLRequest *_Nullable newRequest, NSError *_Nullable error) {
-        GTMSESSION_LOG_DEBUG_VERBOSE(@"GTMSessionFetcher decorator requestWillStart index %zu "
-                                     @"complete, newRequest %@, error %@",
-                                     index, newRequest, error);
-        __strong __typeof__(self) strongSelf = weakSelf;
-        if (!strongSelf) {
-          GTMSESSION_LOG_DEBUG(@"GTMSessionFetcher destroyed before requestWillStart "
-                               @"decorators completed, ignoring.");
-          return;
-        }
-
-        BOOL shouldStop;
-        @synchronized(strongSelf) {
-          GTMSessionMonitorSynchronized(strongSelf);
-
-          shouldStop = strongSelf->_userStoppedFetching;
-          if (shouldStop) {
-            if (strongSelf->_stopFetchingTriggersCompletionHandler) {
-              // Override any error with the cancel error and then trigger the callbacks below.
-              //
-              // The callback for a cancel is sent from here instead of from within `-stopFetching`
-              // like is done for all the other pending states because if `-stopFetching` directly
-              // triggered the callbacks, the decorators would also get triggered and in a
-              // multithreaded case it would be possible for this current decorartor to have
-              // didFinish invoked at the same time but on a different thread; so triggering the
-              // failure completion here will avoid that.
-              error = [NSError errorWithDomain:kGTMSessionFetcherErrorDomain
-                                          code:GTMSessionFetcherErrorUserCancelled
-                                      userInfo:nil];
-            } else {
-              // Suppress any error from being sent due to the `-stopFetching`.
-              error = nil;
-            }
-          }
-        }
-
-        if (error) {
-          [strongSelf failToBeginFetchWithError:(NSError *_Nonnull)error];
-          return;
-        }
-        if (shouldStop) {
-          return;
-        }
-        if (newRequest) {
-          // Copying `NSURLRequest` should be cheap, but in case profiling shows this
-          // operation is prohibitively expensive, this API might need to be changed to allow
-          // clients to manipulate `self.request` directly.
-          [strongSelf updateMutableRequest:[newRequest mutableCopy]];
-        }
-        [strongSelf applyDecoratorsAtRequestWillStart:decorators startingAtIndex:index + 1];
-      }];
+  [decorator fetcherWillStart:self
+            completionHandler:^(NSURLRequest *_Nullable newRequest, NSError *_Nullable error) {
+              GTMSESSION_LOG_DEBUG_VERBOSE(
+                  @"GTMSessionFetcher decorator requestWillStart index %zu "
+                  @"complete, newRequest %@, error %@",
+                  index, newRequest, error);
+              __strong __typeof__(self) strongSelf = weakSelf;
+              if (!strongSelf) {
+                GTMSESSION_LOG_DEBUG(@"GTMSessionFetcher destroyed before requestWillStart "
+                                     @"decorators completed, ignoring.");
+                return;
+              }
+              if (error) {
+                [self failToBeginFetchWithError:(NSError *_Nonnull)error];
+                return;
+              }
+              if (newRequest) {
+                // Copying `NSURLRequest` should be cheap, but in case profiling shows this
+                // operation is prohibitively expensive, this API might need to be changed to allow
+                // clients to manipulate `self.request` directly.
+                [strongSelf updateMutableRequest:[newRequest mutableCopy]];
+              }
+              [strongSelf applyDecoratorsAtRequestWillStart:decorators startingAtIndex:index + 1];
+            }];
 }
 
 - (void)applyDecoratorsAtRequestDidFinish:(NSArray<id<GTMFetcherDecoratorProtocol>> *)decorators
@@ -2108,11 +1848,6 @@ NSData *_Nullable GTMDataFromInputStream(NSInputStream *inputStream, NSError **o
                           startingAtIndex:(NSUInteger)index
                    shouldReleaseCallbacks:(BOOL)shouldReleaseCallbacks {
   GTMSessionCheckNotSynchronized(self);
-
-  // NOTE: At this point, the fetch is done, so if `-stopFetching` comes in now, it does not stop
-  // these from getting called as the completion is currently being invoked with the results of
-  // the fetch.
-
   if (index >= decorators.count) {
     GTMSESSION_LOG_DEBUG_VERBOSE(
         @"GTMSessionFetcher decorate requestDidFinish %zu decorators complete", decorators.count);
@@ -2276,7 +2011,9 @@ NSData *_Nullable GTMDataFromInputStream(NSInputStream *inputStream, NSError **o
   self.retryBlock = nil;
   self.testBlock = nil;
   self.resumeDataBlock = nil;
-  self.metricsCollectionBlock = nil;
+  if (@available(iOS 10.0, *)) {
+    self.metricsCollectionBlock = nil;
+  }
 }
 
 - (void)forgetSessionIdentifierForFetcher {
@@ -2296,38 +2033,14 @@ NSData *_Nullable GTMDataFromInputStream(NSInputStream *inputStream, NSError **o
 
 // External stop method
 - (void)stopFetching {
-  BOOL triggerCallback;
-  BOOL inBeginFetch;
-  BOOL stopTriggersHandler;
   @synchronized(self) {
     GTMSessionMonitorSynchronized(self);
-    stopTriggersHandler = self.stopFetchingTriggersCompletionHandler;
 
     // Prevent enqueued callbacks from executing. The completion handler will still execute if
     // the property `stopFetchingTriggersCompletionHandler` is `YES`.
     _userStoppedFetching = YES;
-
-    // Some of the delayed states want the complition to be triggered from here so they don't have
-    // to do it during their flows for async work.
-    triggerCallback = (_startingState == kStartingStateServiceDelayed ||
-                       _startingState == kStartingStateAuthorizing ||
-                       _startingState == kStartingStateCalculatingUA) &&
-                      stopTriggersHandler;
-
-    // If literally in `-beginFetchMayDelay:mayAuthorize:mayDecorate:`, it will handle the work to
-    // stop.
-    inBeginFetch = _startingState == kStartingStateStartingUp;
-
   }  // @synchronized(self)
-
-  if (triggerCallback) {
-    NSError *error = [NSError errorWithDomain:kGTMSessionFetcherErrorDomain
-                                         code:GTMSessionFetcherErrorUserCancelled
-                                     userInfo:nil];
-    [self failToBeginFetchWithError:error];
-  } else if (!inBeginFetch) {
-    [self stopFetchReleasingCallbacks:!stopTriggersHandler];
-  }
+  [self stopFetchReleasingCallbacks:!self.stopFetchingTriggersCompletionHandler];
 }
 
 // Cancel the fetch of the URL that's currently in progress.
@@ -2339,7 +2052,7 @@ NSData *_Nullable GTMDataFromInputStream(NSInputStream *inputStream, NSError **o
   [self removePersistedBackgroundSessionFromDefaults];
 
   GTMSessionFetcherService *service;
-  NSMutableURLRequest *requestForStopAuth;
+  NSMutableURLRequest *request;
 
   // If the task or the retry timer is all that's retaining the fetcher,
   // we want to be sure this instance survives stopping at least long enough for
@@ -2358,8 +2071,7 @@ NSData *_Nullable GTMDataFromInputStream(NSInputStream *inputStream, NSError **o
     _hasStoppedFetching = YES;
 
     service = _service;
-    // Only will need to stop authorization if in an authorizing state.
-    requestForStopAuth = (_startingState == kStartingStateAuthorizing) ? _request : nil;
+    request = _request;
 
     if (_sessionTask) {
       // In case cancelling the task or session calls this recursively, we want
@@ -2434,9 +2146,7 @@ NSData *_Nullable GTMDataFromInputStream(NSInputStream *inputStream, NSError **o
     [self sendStopNotificationIfNeeded];
   }
 
-  if (requestForStopAuth) {
-    [_authorizer stopAuthorizationForRequest:requestForStopAuth];
-  }
+  [_authorizer stopAuthorizationForRequest:request];
 
   if (shouldReleaseCallbacks) {
     [self releaseCallbacks];
@@ -2471,7 +2181,9 @@ NSData *_Nullable GTMDataFromInputStream(NSInputStream *inputStream, NSError **o
   }  // @synchronized(self)
 
   if (sendNow) {
-    [self postNotificationOnMainThreadWithName:kGTMSessionFetcherStoppedNotification userInfo:nil];
+    [self postNotificationOnMainThreadWithName:kGTMSessionFetcherStoppedNotification
+                                      userInfo:nil
+                                  requireAsync:NO];
   }
 }
 
@@ -2838,7 +2550,8 @@ static _Nullable id<GTMUIApplicationProtocol> gSubstituteUIApp;
   NSString *redirectScheme = redirectRequestURL.scheme;
 
   // If no change in scheme with redirect, just return the redirect.
-  if (originalScheme != nil && redirectScheme != nil &&
+  if (originalScheme != nil &&
+      redirectScheme != nil &&
       [originalScheme caseInsensitiveCompare:redirectScheme] == NSOrderedSame) {
     return redirectRequestURL;
   }
@@ -3052,56 +2765,31 @@ static _Nullable id<GTMUIApplicationProtocol> gSubstituteUIApp;
                             }
                             [self postNotificationOnMainThreadWithName:
                                       kGTMSessionFetcherCompletionInvokedNotification
-                                                              userInfo:userInfo];
+                                                              userInfo:userInfo
+                                                          requireAsync:NO];
                           }];
   }
 }
 
 - (void)postNotificationOnMainThreadWithName:(NSString *)noteName
-                                    userInfo:(nullable NSDictionary *)userInfo {
-  // Historically, the notification has been posted immediately when on the main thread already, so
-  // that is continued to not break any existing code. However, if a notification gets deferred to
-  // be posted on the main thread, then even if some other code is one the main thread, it can't
-  // post it's notification before the deferred one is posted, otherwise you could get a stop and/or
-  // callback notification *before* the start notification. So if anything gets deferred to the main
-  // thread, an immediated post on the main thread also has to get delayed to maintain the order.
-  //
-  // This could get revisited to defer all notifications, but that should probably go out in a
-  // major version bump as it could be breaking to some usages who were dependent on the ordering.
-
-  GTMSessionCheckNotSynchronized(self);
-
-  BOOL canPostNow = NO;
-  @synchronized(self) {
-    GTMSessionMonitorSynchronized(self);
-
-    if (_pendingNotifications == 0 && [NSThread isMainThread]) {
-      canPostNow = YES;
-    } else {
-      // This one will get deferred, so increase the counter for deferred notifications.
-      _pendingNotifications++;
-    }
-  }
-  if (canPostNow) {
+                                    userInfo:(nullable NSDictionary *)userInfo
+                                requireAsync:(BOOL)requireAsync {
+  dispatch_block_t postBlock = ^{
     [[NSNotificationCenter defaultCenter] postNotificationName:noteName
                                                         object:self
                                                       userInfo:userInfo];
+  };
+
+  if ([NSThread isMainThread] && !requireAsync) {
+    // Post synchronously for compatibility with older code using the fetcher.
+
+    // Avoid calling out to other code from inside a sync block to avoid risk
+    // of a deadlock or of recursive sync.
+    GTMSessionCheckNotSynchronized(self);
+
+    postBlock();
   } else {
-    dispatch_async(dispatch_get_main_queue(), ^{
-      @synchronized(self) {
-        GTMSessionMonitorSynchronized(self);
-
-        GTMSESSION_ASSERT_DEBUG(
-            self->_pendingNotifications > 0,
-            @"Internal error: firing pending notification when wasn't tracked: %lu",
-            (unsigned long)self->_pendingNotifications);
-        self->_pendingNotifications--;
-      }
-
-      [[NSNotificationCenter defaultCenter] postNotificationName:noteName
-                                                          object:self
-                                                        userInfo:userInfo];
-    });
+    dispatch_async(dispatch_get_main_queue(), postBlock);
   }
 }
 
@@ -3444,7 +3132,8 @@ static _Nullable id<GTMUIApplicationProtocol> gSubstituteUIApp;
 
 - (void)URLSession:(NSURLSession *)session
                           task:(NSURLSessionTask *)task
-    didFinishCollectingMetrics:(NSURLSessionTaskMetrics *)metrics {
+    didFinishCollectingMetrics:(NSURLSessionTaskMetrics *)metrics
+    API_AVAILABLE(ios(10.0), macosx(10.12), tvos(10.0), watchos(6.0)) {
   @synchronized(self) {
     GTMSessionMonitorSynchronized(self);
     GTMSessionFetcherMetricsCollectionBlock metricsCollectionBlock = _metricsCollectionBlock;
@@ -3829,7 +3518,8 @@ static _Nullable id<GTMUIApplicationProtocol> gSubstituteUIApp;
   }  // @synchronized(self)
 
   [self postNotificationOnMainThreadWithName:kGTMSessionFetcherRetryDelayStartedNotification
-                                    userInfo:nil];
+                                    userInfo:nil
+                                requireAsync:NO];
 }
 
 - (void)retryTimerFired:(NSTimer *)timer {
@@ -3862,7 +3552,8 @@ static _Nullable id<GTMUIApplicationProtocol> gSubstituteUIApp;
 
   if (shouldNotify) {
     [self postNotificationOnMainThreadWithName:kGTMSessionFetcherRetryDelayStoppedNotification
-                                      userInfo:nil];
+                                      userInfo:nil
+                                  requireAsync:NO];
   }
 }
 

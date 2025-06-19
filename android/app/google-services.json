@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "110632736108",
-    "project_id": "quiz-app-d7833",
-    "storage_bucket": "quiz-app-d7833.firebasestorage.app"
+    "project_number": "359395339058",
+    "project_id": "quizzler-49d69",
+    "storage_bucket": "quizzler-49d69.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:110632736108:android:2b0d6445617dab09ff8f49",
+        "mobilesdk_app_id": "1:359395339058:android:cb4c983aaa5de129d6052b",
         "android_client_info": {
           "package_name": "com.yash.quizNight"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyDkFWLFkhTqn4qwoIe5670H3fSrRxVjWwg"
+          "current_key": "AIzaSyDJs7dPvy745vHqDyL1K4cqwRT2XryYJPQ"
         }
       ],
       "services": {

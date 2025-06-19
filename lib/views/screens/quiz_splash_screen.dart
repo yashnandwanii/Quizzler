@@ -2,9 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:page_transition/page_transition.dart';
-import 'package:wallpaper_app/views/screens/login/login_screen.dart';
-import 'package:wallpaper_app/views/screens/signup/signup_screen.dart';
+import 'package:wallpaper_app/views/login/login_screen.dart';
+import 'package:wallpaper_app/views/signup/signup_screen.dart';
 
 class QuizSplashScreen extends StatelessWidget {
   const QuizSplashScreen({super.key});
@@ -69,15 +68,16 @@ class QuizSplashScreen extends StatelessWidget {
                     Expanded(
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          iconColor: Colors.blue,
-                          padding: const EdgeInsets.all(15),
+                          padding: EdgeInsets.symmetric(
+                            vertical: 12.h,
+                          ),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
+                            borderRadius: BorderRadius.circular(10.r),
                           ),
                         ),
                         onPressed: () {
                           Get.to(
-                            const SignupScreen(),
+                            () => const SignupScreen(),
                             transition: Transition.rightToLeft,
                             duration: const Duration(milliseconds: 500),
                           );
@@ -98,15 +98,16 @@ class QuizSplashScreen extends StatelessWidget {
                     Expanded(
                       child: OutlinedButton(
                         style: ElevatedButton.styleFrom(
-                          iconColor: Colors.blue,
-                          padding: const EdgeInsets.all(15),
+                          padding: EdgeInsets.symmetric(
+                            vertical: 12.h,
+                          ),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
+                            borderRadius: BorderRadius.circular(10.r),
                           ),
                         ),
                         onPressed: () {
                           Get.to(
-                            const LoginScreen(),
+                            () => const LoginScreen(),
                             transition: Transition.rightToLeft,
                             duration: const Duration(milliseconds: 500),
                           );
@@ -114,7 +115,7 @@ class QuizSplashScreen extends StatelessWidget {
                         child: Text(
                           'L O G I N',
                           style: TextStyle(
-                            color: Colors.blue,
+                            color: Colors.white,
                             fontSize: 14.sp,
                             fontWeight: FontWeight.bold,
                           ),
