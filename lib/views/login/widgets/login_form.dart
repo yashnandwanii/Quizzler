@@ -24,7 +24,7 @@ class _LoginFormState extends State<LoginForm> {
   final TextEditingController _passwordController = TextEditingController();
   final RxBool isPasswordHidden = true.obs;
   final AuthenticationRepository _authRepo =
-      Get.put(AuthenticationRepository());
+      Get.find<AuthenticationRepository>();
 
   final formKey = GlobalKey<FormState>();
   @override
@@ -171,10 +171,15 @@ class _LoginFormState extends State<LoginForm> {
                         box.erase(); // Clear previous data
                         box.write('userId', user.id);
                         box.write('CurrentUser', user);
-                        // Set login status
+
                         box.write('isLoggedIn', true);
 
                         // Show success message and navigate to Home Screen
+                        await Get.offAll(
+                          () => const MainTabView(),
+                          transition: Transition.rightToLeft,
+                          duration: const Duration(milliseconds: 500),
+                        );
                         Get.showSnackbar(
                           GetSnackBar(
                             title: 'Login Successful',
@@ -182,11 +187,6 @@ class _LoginFormState extends State<LoginForm> {
                             backgroundColor: Colors.green.shade300,
                             duration: const Duration(seconds: 2),
                           ),
-                        );
-                        Get.offAll(
-                          () => const MainTabView(),
-                          transition: Transition.rightToLeft,
-                          duration: const Duration(milliseconds: 500),
                         );
                       }
                     }

@@ -2,15 +2,21 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
+import 'package:wallpaper_app/repository/authentication_repository/authentication_repository.dart';
+import 'package:wallpaper_app/views/home/main_tab_view.dart';
 import 'package:wallpaper_app/views/signup/signup_screen.dart';
 
-class LoginFooter extends StatelessWidget {
-  const LoginFooter({
+class LoginFooterWidget extends StatelessWidget {
+  const LoginFooterWidget({
     super.key,
   });
 
   @override
   Widget build(BuildContext context) {
+    final controller = Get.find<AuthenticationRepository>();
+    final box = GetStorage();
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
@@ -27,6 +33,20 @@ class LoginFooter extends StatelessWidget {
         SizedBox(
           width: double.infinity,
           child: OutlinedButton.icon(
+            onPressed: () async {
+              final userCredential = await controller.signInWithGoogle();
+              if (userCredential != null) {
+                // Save login state
+                box.write('isLoggedIn', true);
+
+                Get.offAll(() => const MainTabView());
+                Get.snackbar(
+                  'Success',
+                  'Welcome, ${userCredential.user?.displayName}!',
+                  snackPosition: SnackPosition.BOTTOM,
+                );
+              }
+            },
             icon: Image(
               image: AssetImage('assets/google_logo.png'),
               height: 16.h,
@@ -37,7 +57,6 @@ class LoginFooter extends StatelessWidget {
                 borderRadius: BorderRadius.circular(10.r),
               ),
             ),
-            onPressed: () {},
             label: Text(
               'Sign In with Google',
               style: TextStyle(

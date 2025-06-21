@@ -134,20 +134,21 @@ class _SignUpFormState extends State<SignUpForm> {
                         _emailController.clear();
                         _passwordController.clear();
                         _fullNameController.clear();
-                        Get.showSnackbar(
-                          GetSnackBar(
-                            title: 'Success',
-                            message: 'Sign Up Successful',
-                            duration: Duration(seconds: 2),
-                            backgroundColor: Colors.green.shade300,
-                            snackPosition: SnackPosition.BOTTOM,
-                          ),
-                        );
+
                         Get.offAll(
                           () => const MainTabView(),
                           transition: Transition.rightToLeft,
                           duration: const Duration(milliseconds: 500),
                         );
+                        Future.delayed(const Duration(milliseconds: 600), () {
+                          Get.snackbar(
+                            'Sign Up Successful',
+                            'Welcome to the app!',
+                            backgroundColor: Colors.green.shade300,
+                            duration: const Duration(seconds: 2),
+                            snackPosition: SnackPosition.BOTTOM,
+                          );
+                        });
                       }
                     }
                   } else {

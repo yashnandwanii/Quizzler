@@ -12,7 +12,12 @@
           "package_name": "com.yash.quizNight"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "359395339058-rehqmj0qujr8k2c6vhc3atcnnq07bfvl.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyDJs7dPvy745vHqDyL1K4cqwRT2XryYJPQ"
@@ -20,7 +25,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "359395339058-rehqmj0qujr8k2c6vhc3atcnnq07bfvl.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "359395339058-bigqpto4aofudtt8ukae9sc38idj591k.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.yash.quizNight"
+              }
+            }
+          ]
         }
       }
     }

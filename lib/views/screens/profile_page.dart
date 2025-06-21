@@ -1,206 +1,194 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:wallpaper_app/common/constant.dart';
+import 'package:wallpaper_app/model/user_model.dart';
+import 'package:wallpaper_app/repository/authentication_repository/authentication_repository.dart';
+import 'package:wallpaper_app/repository/user_repository/user_repository.dart';
+import 'package:wallpaper_app/views/screens/settings_screen.dart';
+import 'package:wallpaper_app/views/screens/update_profile.dart';
 
-class ProfilePage extends StatefulWidget {
+class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
 
   @override
-  State<ProfilePage> createState() => _ProfilePageState();
-}
+  Widget build(BuildContext context) {
+    final authRepo = Get.find<AuthenticationRepository>();
+    final userRepo = Get.find<UserRepository>();
+    final userId = authRepo.firebaseUser.value?.uid;
 
-class _ProfilePageState extends State<ProfilePage> {
-  bool _isDarkMode = false;
+    if (userId == null) {
+      // Handle non-logged-in user case
+      return const Scaffold(
+        body: Center(
+          child: Text("You're not logged in."),
+        ),
+      );
+    }
 
-  bool get isDarkMode => _isDarkMode;
+    return Scaffold(
+      backgroundColor: offwhite,
+      body: FutureBuilder<UserModel?>(
+        future: userRepo.getUserData(userId),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (snapshot.hasError || !snapshot.hasData || snapshot.data == null) {
+            return const Center(child: Text('Failed to load user data.'));
+          }
 
-  set isDarkMode(bool value) {
-    setState(() {
-      _isDarkMode = value;
-    });
+          final user = snapshot.data!;
+
+          return SingleChildScrollView(
+            padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 40.h),
+            child: Column(
+              children: [
+                _buildProfileHeader(user),
+                SizedBox(height: 20.h),
+                _buildStats(user),
+                SizedBox(height: 20.h),
+                _buildMenuList(context),
+              ],
+            ),
+          );
+        },
+      ),
+    );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Column(
-        children: [
-          Stack(
-            children: [
-              Container(
-                height: 300,
-                width: double.infinity,
-                decoration: const BoxDecoration(
-                  //color: Colors.blue,
-                  borderRadius: BorderRadius.only(
-                    bottomLeft: Radius.circular(30),
-                    bottomRight: Radius.circular(30),
-                  ),
-                ),
-                child: Stack(
-                  children: [
-                    Column(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.only(top: 50, left: 20),
-                          height: 220,
-                          width: double.infinity,
-                          decoration: BoxDecoration(
-                            color: const Color.fromRGBO(42, 43, 48, 1),
-                            borderRadius: BorderRadius.circular(30),
-                            boxShadow: const [
-                              BoxShadow(
-                                color: Colors.black26,
-                                blurRadius: 5.0,
-                              ),
-                            ],
-                          ),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Text(
-                                'Profile',
-                                style: GoogleFonts.rockSalt(
-                                  fontSize: 80,
-                                  color: const Color.fromARGB(255, 4, 91, 163),
-                                ),
-                              ),
-                              const SizedBox(
-                                height: 10,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                    Container(
-                      margin: const EdgeInsets.only(top: 140),
-                      alignment: Alignment.center,
-                      child: const CircleAvatar(
-                        radius: 90,
-                        backgroundColor: Colors.white,
-                        child: CircleAvatar(
-                          radius: 80,
-                          backgroundColor: Colors.white,
-                          backgroundImage: NetworkImage(
-                              'https://imgs.search.brave.com/Mpac-KOW2uEx8_Ot8ajvzF8kaqCCZRVozZ-SkZnfujQ/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly90NC5m/dGNkbi5uZXQvanBn/LzA2Lzc1Lzc4Lzk5/LzM2MF9GXzY3NTc4/OTk0M18yMDR3dFh2/YlMxa0JUd2JDNGhO/N2tVSGNtRGN0OVIw/di5qcGc'),
-                        ),
-                      ),
-                    )
-                  ],
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(
-            height: 10,
-          ),
-          Text(
-            'Rahul Kumar',
-            style: GoogleFonts.arvo(
-              color: Colors.black,
-              fontSize: 24,
+  Widget _buildProfileHeader(UserModel user) {
+    return Column(
+      children: [
+        Stack(
+          children: [
+            CircleAvatar(
+              radius: 60.r,
+              backgroundImage: user.photoUrl.isNotEmpty
+                  ? NetworkImage(user.photoUrl)
+                  : const AssetImage('assets/app_logo.png') as ImageProvider,
+              backgroundColor: Colors.grey.shade200,
             ),
-          ),
-          const SizedBox(
-            height: 10,
-          ),
-          Card(
-            margin: const EdgeInsets.symmetric(horizontal: 20),
-            elevation: 5,
-            child: ListTile(
-              title: Text(
-                'Email',
-                style: GoogleFonts.arvo(
+            Positioned(
+              bottom: 0,
+              right: 0,
+              child: CircleAvatar(
+                radius: 10.r,
+                backgroundColor: Colors.white,
+                child: Icon(
+                  Icons.edit,
                   color: Colors.black,
-                  fontSize: 20,
-                ),
-              ),
-              subtitle: Text(
-                'xyz@gmail.com',
-                style: GoogleFonts.arvo(
-                  color: Colors.black,
-                  fontSize: 16,
                 ),
               ),
             ),
+          ],
+        ),
+        SizedBox(height: 16.h),
+        Text(
+          user.fullName,
+          style: GoogleFonts.robotoMono(
+            fontSize: 16.sp,
+            fontWeight: FontWeight.bold,
           ),
-          Card(
-            margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-            elevation: 5,
-            child: ListTile(
-              title: Text(
-                'Phone',
-                style: GoogleFonts.arvo(
-                  color: Colors.black,
-                  fontSize: 20,
-                ),
-              ),
-              subtitle: Text(
-                '1234567890',
-                style: GoogleFonts.arvo(
-                  color: Colors.black,
-                  fontSize: 16,
-                ),
-              ),
-            ),
+        ),
+        SizedBox(height: 4.h),
+        Text(
+          user.email,
+          style: TextStyle(
+            fontSize: 12.sp,
+            color: Colors.grey.shade600,
           ),
-          Card(
-            margin: const EdgeInsets.symmetric(horizontal: 20),
-            elevation: 5,
-            child: ListTile(
-              title: Text(
-                'Address',
-                style: GoogleFonts.arvo(
-                  color: Colors.black,
-                  fontSize: 20,
-                ),
-              ),
-              subtitle: Text(
-                'Delhi, India',
-                style: GoogleFonts.arvo(
-                  color: Colors.black,
-                  fontSize: 16,
-                ),
-              ),
-            ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildStats(UserModel user) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceAround,
+      children: [
+        _buildStatItem('Coins', user.coins.toString(), Icons.monetization_on),
+        _buildStatItem('Rank', '#${user.rank}', Icons.leaderboard),
+      ],
+    );
+  }
+
+  Widget _buildStatItem(String label, String value, IconData icon) {
+    return Column(
+      children: [
+        Icon(icon, size: 30, color: Colors.blue),
+        SizedBox(height: 4.h),
+        Text(value,
+            style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold)),
+        SizedBox(height: 4.h),
+        Text(label,
+            style: TextStyle(fontSize: 14.sp, color: Colors.grey.shade600)),
+      ],
+    );
+  }
+
+  Widget _buildMenuList(BuildContext context) {
+    return Column(
+      children: [
+        _buildMenuTile(
+          title: 'Settings',
+          icon: Icons.settings,
+          onTap: () => Get.to(() => const SettingsScreen()),
+        ),
+        _buildMenuTile(
+          title: 'Share',
+          icon: Icons.share,
+          onTap: () {
+            // It's good practice to include a link to your app on the app stores.
+            // For this example, we'll just share a simple text message.
+            // SharePlus.instance.share(
+
+            // );
+          },
+        ),
+        _buildMenuTile(
+          title: 'Logout',
+          icon: Icons.logout,
+          onTap: () {
+            AuthenticationRepository.instance.logout();
+          },
+          isLogout: true,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMenuTile({
+    required String title,
+    required IconData icon,
+    required VoidCallback onTap,
+    bool isLogout = false,
+  }) {
+    return Card(
+      color: Colors.white,
+      margin: EdgeInsets.symmetric(vertical: 8.h),
+      elevation: 2,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10.r),
+      ),
+      child: ListTile(
+        leading: Icon(icon, color: isLogout ? Colors.red : Colors.blue),
+        title: Text(
+          title,
+          style: TextStyle(
+            fontWeight: FontWeight.w500,
+            color: isLogout ? Colors.red : Colors.black87,
           ),
-          Card(
-            margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-            elevation: 5,
-            child: ListTile(
-              title: Text(
-                'Date of Birth',
-                style: GoogleFonts.arvo(
-                  color: Colors.black,
-                  fontSize: 20,
-                ),
+        ),
+        trailing: isLogout
+            ? null
+            : const Icon(
+                Icons.arrow_forward_ios,
+                size: 16,
               ),
-              subtitle: Text(
-                '01-01-2000',
-                style: GoogleFonts.arvo(
-                  color: Colors.black,
-                  fontSize: 16,
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(
-            height: 20,
-          ),
-          ElevatedButton(
-            onPressed: () {
-              // Navigator.push(
-              //   context,
-              //   MaterialPageRoute(
-              //     builder: (context) => EditProfile(),
-              //   ),
-              // );
-            },
-            child: const Text('Edit Profile',
-                style: TextStyle(fontSize: 20, color: Colors.blue)),
-          ),
-        ],
+        onTap: onTap,
       ),
     );
   }

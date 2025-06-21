@@ -3,8 +3,9 @@
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:wallpaper_app/views/home/home_screen.dart';
-import 'package:wallpaper_app/views/screens/categories_screen.dart';
+import 'package:wallpaper_app/views/Category/categories_screen.dart';
 import 'package:wallpaper_app/views/screens/profile_page.dart';
+import 'package:wallpaper_app/views/screens/leaderboard_screen.dart';
 
 class MainTabView extends StatefulWidget {
   const MainTabView({super.key});
@@ -20,6 +21,7 @@ class _MainTabViewState extends State<MainTabView> {
   final List<Widget> _screens = [
     const HomeScreen(),
     const CategoriesScreen(),
+    const LeaderboardScreen(),
     const ProfilePage(),
   ];
 
@@ -32,17 +34,19 @@ class _MainTabViewState extends State<MainTabView> {
         index: currentIndex,
         backgroundColor: Colors.white,
         height: 70,
-        color: const Color.fromRGBO(42, 43, 48, 1),
+        color: Colors.blue.shade900,
+        buttonBackgroundColor: const Color.fromARGB(255, 33, 54, 243),
         onTap: (selectedIndex) {
           setState(() {
             currentIndex = selectedIndex;
           });
         },
-        animationDuration: const Duration(milliseconds: 300),
+        animationDuration: const Duration(milliseconds: 400),
         items: const [
-          Icon(Icons.home, size: 30, color: Colors.white),
-          Icon(Icons.category, size: 30, color: Colors.white),
-          Icon(Icons.person, size: 30, color: Colors.white),
+          Icon(Icons.home_outlined, size: 30, color: Colors.white),
+          Icon(Icons.quiz_outlined, size: 30, color: Colors.white),
+          Icon(Icons.leaderboard_outlined, size: 30, color: Colors.white),
+          Icon(Icons.person_outline, size: 30, color: Colors.white),
         ],
       ),
     );

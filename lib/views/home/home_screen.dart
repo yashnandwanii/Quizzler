@@ -1,16 +1,40 @@
-// Home Content Widget
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:get_storage/get_storage.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:wallpaper_app/views/GivenQuizzes/givenquizzes.dart';
 import 'package:wallpaper_app/model/user_model.dart';
 import 'package:wallpaper_app/repository/authentication_repository/authentication_repository.dart';
-import 'package:wallpaper_app/services/quote_api.dart';
-import 'package:wallpaper_app/views/home/widgets/category_tile.dart';
-import 'package:wallpaper_app/views/screens/categories_screen.dart';
-import 'package:wallpaper_app/views/screens/profile_page.dart';
-import 'package:wallpaper_app/views/screens/quiz_screen.dart';
+import 'package:wallpaper_app/repository/user_repository/user_repository.dart';
+import 'package:wallpaper_app/views/Category/categories_screen.dart';
 
+// --- Models ---
+class QuizCategory {
+  final String name;
+  final String iconPath; // Using local asset paths for icons
+  final int quizCount;
+
+  QuizCategory({
+    required this.name,
+    required this.iconPath,
+    required this.quizCount,
+  });
+}
+
+// --- Data ---
+// In a real app, this would come from a database.
+final List<QuizCategory> yourQuizzes = [
+  QuizCategory(
+      name: 'Integers Quiz', iconPath: 'assets/maths.png', quizCount: 10),
+  QuizCategory(
+      name: 'General Knowledge', iconPath: 'assets/school.png', quizCount: 6),
+  QuizCategory(
+      name: 'Computer Science',
+      iconPath: 'assets/computer-science.png',
+      quizCount: 12),
+];
+
+// --- UI ---
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -19,264 +43,451 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final box = GetStorage();
-  UserModel? user;
-  final AuthenticationRepository _authRepo =
-      Get.put(AuthenticationRepository());
-  late Future<void> _initFuture;
+  String wish = 'Good Morning';
 
-  @override
-  void initState() {
-    super.initState();
-    _initFuture = _loadUserData();
-  }
+  List<Map<String, dynamic>> quizCards = [
+    {
+      'title': 'Saturday night Quiz',
+      'category': 'General Knowledge',
+      'duration': '2min',
+      'quizzes': 13,
+      'sharedBy': 'Brandon Matrovs',
+      'image': 'https://i.pravatar.cc/150?img=2',
+      'color': const Color(0xFF4A4A4A),
+    },
+    {
+      'title': 'Math Mastery',
+      'category': 'Mathematics',
+      'duration': '5min',
+      'quizzes': 8,
+      'sharedBy': 'Alice Johnson',
+      'image': 'https://i.pravatar.cc/150?img=3',
+      'color': const Color(0xFF2E7D32),
+    },
+    {
+      'title': 'Tech Trivia',
+      'category': 'Computer Science',
+      'duration': '3min',
+      'quizzes': 10,
+      'sharedBy': 'John Doe',
+      'image': 'https://i.pravatar.cc/150?img=4',
+      'color': const Color(0xFF1565C0),
+    },
+  ];
 
-  Future<void> _loadUserData() async {
-    final userData = box.read('user');
-
-    if (userData == null) {
-      Get.snackbar('Error', 'User data not found');
-      user = UserModel(id: '', fullName: 'Guest', email: '', password: '');
+  void getWish() {
+    final hour = DateTime.now().hour;
+    if (hour < 12) {
+      wish = 'Good Morning';
+    } else if (hour < 18) {
+      wish = 'Good Afternoon';
     } else {
-      user = UserModel.fromJson(Map<String, dynamic>.from(userData));
+      wish = 'Good Evening';
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final Future<String> data = QuoteApi.getQuote();
+    final authRepo = Get.find<AuthenticationRepository>();
+    final userRepo = Get.find<UserRepository>();
+    final userId = authRepo.firebaseUser.value?.uid;
 
-    return FutureBuilder(
-      future: _initFuture,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState != ConnectionState.done) {
-          return const Scaffold(
-            body: Center(child: CircularProgressIndicator()),
-          );
-        }
-
-        return SingleChildScrollView(
-          child: Column(
-            children: [
-              // Header Section
-              Stack(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.only(top: 55, left: 20),
-                    height: 300,
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                      color: const Color.fromRGBO(42, 43, 48, 1),
-                      borderRadius: BorderRadius.circular(30),
-                      boxShadow: const [
-                        BoxShadow(
-                          color: Colors.black26,
-                          blurRadius: 5.0,
-                        ),
-                      ],
-                    ),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const CircleAvatar(
-                          radius: 20,
-                          backgroundImage: NetworkImage(
-                            'https://imgs.search.brave.com/Mpac-KOW2uEx8_Ot8ajvzF8kaqCCZRVozZ-SkZnfujQ/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly90NC5m/dGNkbi5uZXQvanBn/LzA2Lzc1Lzc4Lzk5/LzM2MF9GXzY3NTc4/OTk0M18yMDR3dFh2/YlMxa0JUd2JDNGhO/N2tVSGNtRGN0OVIw/di5qcGc',
-                          ),
-                        ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: Text(
-                            'Welcome, ${user!.fullName}',
-                            style: GoogleFonts.arvo(
-                              color: Colors.white,
-                              fontSize: 25,
-                              fontWeight: FontWeight.bold,
-                            ),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                        IconButton(
-                          onPressed: () {
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (context) => const ProfilePage(),
-                              ),
-                            );
-                          },
-                          icon: const Icon(
-                            Icons.notifications_none_outlined,
-                            size: 30,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Container(
-                    padding: const EdgeInsets.only(top: 100, left: 20),
-                    child: Text(
-                      'Fact of the Day:',
-                      style: GoogleFonts.trocchi(
-                        color: Colors.blue,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                  Card(
-                    elevation: 0.0,
-                    margin:
-                        const EdgeInsets.only(top: 150, left: 20, right: 20),
-                    color: const Color.fromRGBO(42, 43, 48, 1),
-                    child: Center(
-                      child: FutureBuilder<String>(
-                        future: data,
-                        builder: (context, snapshot) {
-                          if (snapshot.connectionState ==
-                              ConnectionState.waiting) {
-                            return const CircularProgressIndicator(
-                                color: Colors.white);
-                          } else if (snapshot.hasError) {
-                            return const Text(
-                              'Error loading quote!',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            );
-                          } else {
-                            return Text(
-                              snapshot.data ?? 'No quote available',
-                              style: GoogleFonts.trocchi(
-                                color: Colors.white,
-                                fontSize: 15,
-                                fontWeight: FontWeight.bold,
-                              ),
-                              textAlign: TextAlign.center,
-                            );
-                          }
-                        },
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 20),
-              // Top Quiz Categories
-              Row(
-                children: [
-                  const SizedBox(width: 10),
-                  const Text(
-                    'Top Quiz Categories',
-                    style: TextStyle(
-                      color: Colors.black,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 22,
-                    ),
-                  ),
-                  const Spacer(),
-                  TextButton(
-                    onPressed: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) => const CategoriesScreen(),
-                        ),
-                      );
-                    },
-                    child: const Text(
-                      'View All',
-                      style: TextStyle(
-                        color: Colors.blue,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                ],
-              ),
-
-              SizedBox(
-                height: 300,
-                width: double.infinity,
-                child: GridView(
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    childAspectRatio: 2,
-                  ),
-                  children: [
-                    CategoryTile(
-                      title: 'General Knowledge',
-                      imagePath: 'assets/school.png',
-                      screen: QuizScreen(category: 9, any: false),
-                      context: context,
-                    ),
-                    CategoryTile(
-                        title: 'Computer Science',
-                        imagePath: 'assets/computer-science.png',
-                        screen: QuizScreen(category: 18, any: false),
-                        context: context),
-                    CategoryTile(
-                        title: 'Sports',
-                        imagePath: 'assets/sports.png',
-                        screen: QuizScreen(category: 21, any: false),
-                        context: context),
-                    CategoryTile(
-                        title: 'Mathematics',
-                        imagePath: 'assets/maths.png',
-                        screen: QuizScreen(category: 19, any: false),
-                        context: context),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 10),
-              // Daily Quiz Card
-              Card(
-                elevation: 4,
-                surfaceTintColor: Colors.white38,
-                child: SizedBox(
-                  width: double.infinity,
-                  height: 150,
-                  child: Row(
+    return Scaffold(
+      backgroundColor: const Color(0xFFF4F5F9),
+      body: SafeArea(
+        child: FutureBuilder<UserModel?>(
+            future: userRepo.getUserData(userId!),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              if (snapshot.hasError || !snapshot.hasData) {
+                return const Center(child: Text("Could not load user data."));
+              }
+              final user = snapshot.data!;
+              return SingleChildScrollView(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 10.w),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const SizedBox(width: 10),
-                      const Text(
-                        'Daily Quiz',
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 28,
-                        ),
-                      ),
-                      const Spacer(),
-                      TextButton(
-                        onPressed: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (context) =>
-                                  QuizScreen(category: 10, any: true),
+                      SizedBox(height: 10.h),
+                      _buildHeader(user),
+                      SizedBox(height: 20.h),
+                      Row(
+                        children: [
+                          Text(
+                            'Quizzes',
+                            style: GoogleFonts.inter(
+                              fontSize: 20.sp,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black,
                             ),
-                          );
-                        },
-                        child: const Text(
-                          'Play Now',
-                          style: TextStyle(
-                            color: Colors.blue,
-                            fontWeight: FontWeight.bold,
                           ),
+                          Spacer(),
+                          GestureDetector(
+                            onTap: () {
+                              Get.to(
+                                () => CategoriesScreen(),
+                                transition: Transition.rightToLeft,
+                                duration: const Duration(milliseconds: 500),
+                              );
+                            },
+                            child: Text(
+                              'See all',
+                              style: GoogleFonts.robotoMono(
+                                fontSize: 12.sp,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.grey.shade600,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 10.h),
+                      Container(
+                        height: 200.h,
+                        margin: EdgeInsets.symmetric(horizontal: 5.w),
+                        width: MediaQuery.of(context).size.width,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(20.r),
+                        ),
+                        child: Stack(
+                          alignment: Alignment.center,
+                          children: quizCards
+                              .asMap()
+                              .entries
+                              .map((entry) {
+                                int index = entry.key;
+                                final card = entry.value;
+
+                                if (index > 2) return const SizedBox();
+
+                                double topOffset = 10.0 * index;
+                                double scale = 1.0 - (0.05 * index);
+
+                                return Positioned(
+                                  top: topOffset.h,
+                                  child: AnimatedScale(
+                                    scale: scale,
+                                    duration: const Duration(milliseconds: 300),
+                                    curve: Curves.easeOut,
+                                    child: index == 0
+                                        ? Dismissible(
+                                            key: Key(card['title']),
+                                            direction:
+                                                DismissDirection.horizontal,
+                                            onDismissed: (direction) {
+                                              setState(() {
+                                                final removed =
+                                                    quizCards.removeAt(0);
+                                                quizCards.add(removed);
+                                              });
+                                            },
+                                            child: _buildMainQuizCard(
+                                              title: card['title'],
+                                              category: card['category'],
+                                              duration: card['duration'],
+                                              quizzes: card['quizzes'],
+                                              sharedBy: card['sharedBy'],
+                                              avatarUrl: card['image'],
+                                              backgroundColor: card['color'],
+                                            ),
+                                          )
+                                        : _buildMainQuizCard(
+                                            title: card['title'],
+                                            category: card['category'],
+                                            duration: card['duration'],
+                                            quizzes: card['quizzes'],
+                                            sharedBy: card['sharedBy'],
+                                            avatarUrl: card['image'],
+                                            backgroundColor: card['color'],
+                                          ),
+                                  ),
+                                );
+                              })
+                              .toList()
+                              .reversed
+                              .toList(),
                         ),
                       ),
-                      const SizedBox(width: 10),
+                      SizedBox(height: 10.h),
+                      _buildYourQuizzesSection(),
                     ],
+                  ),
+                ),
+              );
+            }),
+      ),
+    );
+  }
+
+  Widget _buildHeader(UserModel user) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              wish.toUpperCase(),
+              style: GoogleFonts.robotoMono(
+                  fontSize: 12.sp,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.grey.shade600),
+            ),
+            SizedBox(height: 4.h),
+            Text(
+              user.fullName.split(' ').first, // Show first name
+              style: GoogleFonts.inter(
+                fontSize: 18.sp,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+              ),
+            ),
+          ],
+        ),
+        CircleAvatar(
+          radius: 20.r,
+          backgroundImage: user.photoUrl.isNotEmpty
+              ? NetworkImage(user.photoUrl)
+              : const AssetImage('assets/app_logo.png') as ImageProvider,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMainQuizCard({
+    String? title,
+    String? category,
+    String? duration,
+    int? quizzes,
+    String? sharedBy,
+    String? avatarUrl,
+    Color? backgroundColor,
+  }) {
+    return Container(
+      height: 180.h,
+      width: MediaQuery.of(context).size.width / 1.1,
+      padding: EdgeInsets.all(16.w),
+      decoration: BoxDecoration(
+        color: backgroundColor ?? const Color(0xFF4A4A4A),
+        borderRadius: BorderRadius.circular(25.r),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16.r),
+                ),
+                child: Text(category ?? 'General Knowledge',
+                    style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
+              ),
+              SizedBox(width: 8.w),
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
+                decoration: BoxDecoration(
+                  color: Colors.white24,
+                  borderRadius: BorderRadius.circular(16.r),
+                ),
+                child: Text(duration ?? '2min',
+                    style: GoogleFonts.inter(
+                        fontWeight: FontWeight.bold, color: Colors.white)),
+              ),
+              const Spacer(),
+              const Icon(Icons.close, color: Colors.white),
+            ],
+          ),
+          SizedBox(height: 16.h),
+          Text(
+            title ?? 'Saturday night Quiz',
+            style: GoogleFonts.inter(
+              fontSize: 22.sp,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+          ),
+          SizedBox(height: 4.h),
+          Text('${quizzes ?? 13} Quizzes',
+              style: TextStyle(color: Colors.white70)),
+          SizedBox(height: 10.h),
+          Row(
+            children: [
+              CircleAvatar(
+                radius: 16,
+                backgroundImage:
+                    avatarUrl != null ? NetworkImage(avatarUrl) : null,
+                backgroundColor: Colors.transparent,
+              ),
+              SizedBox(width: 8.w),
+              Text(
+                'Shared By\n${sharedBy ?? 'Brandon Matrovs'}',
+                style: TextStyle(color: Colors.white),
+              ),
+              const Spacer(),
+              ElevatedButton(
+                onPressed: () {},
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color.fromARGB(255, 41, 30, 255),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12.r),
+                  ),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 10.w,
+                    vertical: 6.h,
+                  ),
+                ),
+                child: Text(
+                  'Start Now',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 12.sp,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ),
             ],
           ),
-        );
-      },
+        ],
+      ),
+    );
+  }
+
+  Widget _buildYourQuizzesSection() {
+    return Column(
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text('Your Quizzes',
+                style: GoogleFonts.inter(
+                    fontSize: 20.sp, fontWeight: FontWeight.bold)),
+            TextButton(
+              onPressed: () {
+                Get.to(
+                  () => Givenquizzes(),
+                  transition: Transition.rightToLeft,
+                  duration: const Duration(milliseconds: 300),
+                  fullscreenDialog: true,
+                  popGesture: true,
+                );
+              },
+              child: Text(
+                'See all',
+                style: GoogleFonts.robotoMono(
+                    fontSize: 12.sp, color: Colors.grey.shade600),
+              ),
+            ),
+          ],
+        ),
+        SizedBox(height: 8.h),
+        ListView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: yourQuizzes.length,
+          itemBuilder: (context, index) {
+            final category = yourQuizzes[index];
+            return _buildQuizListItem(category);
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildQuizListItem(QuizCategory category) {
+    return Container(
+      margin: EdgeInsets.only(bottom: 16.h),
+      padding: EdgeInsets.all(16.w),
+      decoration: BoxDecoration(
+        color: Colors.grey.shade200,
+        borderRadius: BorderRadius.circular(20.r),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.blue.withOpacity(0.3),
+            blurRadius: 10,
+            offset: const Offset(0, 5),
+          )
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: EdgeInsets.all(10.w),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16.r),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 50.w,
+                  height: 40.h,
+                  decoration: BoxDecoration(
+                    color: Colors.blue.withOpacity(0.3),
+                    borderRadius: BorderRadius.circular(16.r),
+                  ),
+                  child: Center(
+                    child: Image.asset(category.iconPath, width: 30.w),
+                  ),
+                ),
+                SizedBox(width: 16.w),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      category.name,
+                      style: GoogleFonts.inter(
+                        fontSize: 12.sp,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    SizedBox(height: 4.h),
+                    Text('${category.quizCount} Quizzes',
+                        style: TextStyle(color: Colors.grey.shade600)),
+                  ],
+                ),
+                const Spacer(),
+                TextButton.icon(
+                  onPressed: () {},
+                  icon: const Icon(Icons.bar_chart, color: Color(0xFF3D5CFF)),
+                  label: const Text(
+                    'Results',
+                    style: TextStyle(color: Color.fromARGB(255, 37, 72, 243)),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          SizedBox(height: 16.h),
+          Row(
+            children: [
+              Stack(
+                children: List.generate(3, (index) {
+                  return Padding(
+                    padding: EdgeInsets.only(left: (18 * index).toDouble()),
+                    child: CircleAvatar(
+                      radius: 12,
+                      backgroundImage: NetworkImage(
+                          'https://i.pravatar.cc/150?img=${index + 4}'),
+                    ),
+                  );
+                }),
+              ),
+              SizedBox(width: (18 * 3).w + 8.w),
+              Text(
+                '+437 People join',
+                style: TextStyle(color: Colors.grey.shade600),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }

@@ -2,9 +2,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:wallpaper_app/model/user_model.dart';
 import 'package:wallpaper_app/views/screens/quiz_splash_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:wallpaper_app/repository/user_repository/user_repository.dart';
 
 class AuthenticationRepository extends GetxController {
   static AuthenticationRepository get instance => Get.find();
@@ -20,7 +22,50 @@ class AuthenticationRepository extends GetxController {
   @override
   void onReady() {
     firebaseUser.bindStream(_auth.userChanges());
-    // You can use `once` or flag-based logic to navigate to initial screen
+  }
+
+  final GoogleSignIn _googleSignIn = GoogleSignIn();
+
+  Future<UserCredential?> signInWithGoogle() async {
+    try {
+      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+      if (googleUser == null) return null; // User cancelled the sign-in
+
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
+
+      final credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+
+      final userCredential = await _auth.signInWithCredential(credential);
+      final user = userCredential.user;
+
+      if (user != null) {
+        // Check if user exists in Firestore, if not, create a new user document
+        final userRepo = Get.find<UserRepository>();
+        final doc = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .get();
+        if (!doc.exists) {
+          final newUser = UserModel(
+              id: user.uid,
+              email: user.email ?? '',
+              fullName: user.displayName ?? 'No Name',
+              photoUrl: user.photoURL ?? '',
+              password: "" // Not needed for Google Sign-In
+              );
+          await userRepo.createUser(newUser);
+        }
+      }
+      return userCredential;
+    } catch (e) {
+      debugPrint('Google Sign-In Error: $e');
+      Get.snackbar('Error', 'Google Sign-In failed. Please try again.');
+      return null;
+    }
   }
 
   // ---------------- PHONE AUTH ----------------
@@ -169,7 +214,7 @@ class AuthenticationRepository extends GetxController {
     }
   }
 
-  Future<UserModel> signInWithEmailAndPassword(
+  Future<UserModel?> signInWithEmailAndPassword(
       String email, String password) async {
     _isLoading.value = true;
     try {
@@ -189,14 +234,16 @@ class AuthenticationRepository extends GetxController {
         'user-not-found' => 'User not found. Please sign up.',
         'wrong-password' => 'Wrong password. Try again.',
         'invalid-email' => 'Invalid email address.',
+        'network-request-failed' =>
+          'Network error. Please check your internet connection.',
         _ => e.message ?? 'An unknown error occurred.',
       };
       Get.snackbar('Login Failed', message, backgroundColor: Colors.redAccent);
-      throw FirebaseAuthException(code: e.code, message: message);
+      return null;
     } catch (e) {
       debugPrint('Unexpected login error: $e');
       Get.snackbar('Error', 'Unexpected error. Try again.');
-      throw Exception('Unexpected login error: $e');
+      return null;
     } finally {
       _isLoading.value = false;
     }

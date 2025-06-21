@@ -1414,6 +1414,8 @@ PODS:
   - RecaptchaInterop (101.0.0)
   - share (0.0.1):
     - Flutter
+  - share_plus (0.0.1):
+    - Flutter
 
 DEPENDENCIES:
   - cloud_firestore (from `.symlinks/plugins/cloud_firestore/ios`)
@@ -1424,6 +1426,7 @@ DEPENDENCIES:
   - google_sign_in_ios (from `.symlinks/plugins/google_sign_in_ios/darwin`)
   - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/darwin`)
   - share (from `.symlinks/plugins/share/ios`)
+  - share_plus (from `.symlinks/plugins/share_plus/ios`)
 
 SPEC REPOS:
   trunk:
@@ -1469,6 +1472,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/path_provider_foundation/darwin"
   share:
     :path: ".symlinks/plugins/share/ios"
+  share_plus:
+    :path: ".symlinks/plugins/share_plus/ios"
 
 SPEC CHECKSUMS:
   abseil: a05cc83bf02079535e17169a73c5be5ba47f714b
@@ -1503,7 +1508,8 @@ SPEC CHECKSUMS:
   PromisesObjC: f5707f49cb48b9636751c5b2e7d227e43fba9f47
   RecaptchaInterop: 11e0b637842dfb48308d242afc3f448062325aba
   share: 0b2c3e82132f5888bccca3351c504d0003b3b410
+  share_plus: 8b6f8b3447e494cca5317c8c3073de39b3600d1f
 
-PODFILE CHECKSUM: 7cbf3d833a9f63a94545effabf5794240997e4a7
+PODFILE CHECKSUM: 267c81ad4f79c7e9ad0f7f31100e20568a6adf09
 
 COCOAPODS: 1.16.2

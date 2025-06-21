@@ -25,3 +25,4 @@ ${BUILT_PRODUCTS_DIR}/leveldb-library/leveldb.framework
 ${BUILT_PRODUCTS_DIR}/nanopb/nanopb.framework
 ${BUILT_PRODUCTS_DIR}/path_provider_foundation/path_provider_foundation.framework
 ${BUILT_PRODUCTS_DIR}/share/share.framework
+${BUILT_PRODUCTS_DIR}/share_plus/share_plus.framework
