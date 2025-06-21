@@ -2,13 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:share_plus/share_plus.dart';
 import 'package:wallpaper_app/common/constant.dart';
 import 'package:wallpaper_app/model/user_model.dart';
 import 'package:wallpaper_app/repository/authentication_repository/authentication_repository.dart';
 import 'package:wallpaper_app/repository/user_repository/user_repository.dart';
 import 'package:wallpaper_app/views/screens/settings_screen.dart';
-import 'package:wallpaper_app/views/screens/update_profile.dart';
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
@@ -64,22 +62,41 @@ class ProfilePage extends StatelessWidget {
       children: [
         Stack(
           children: [
-            CircleAvatar(
-              radius: 60.r,
-              backgroundImage: user.photoUrl.isNotEmpty
-                  ? NetworkImage(user.photoUrl)
-                  : const AssetImage('assets/app_logo.png') as ImageProvider,
-              backgroundColor: Colors.grey.shade200,
+            Container(
+              height: 150,
+              width: 150,
+              decoration: BoxDecoration(
+                border: Border.all(
+                    color: Colors.black.withValues(alpha: 0.1), width: 2),
+                borderRadius: BorderRadius.circular(100),
+                color: Colors.black,
+              ),
+              child: CircleAvatar(
+                radius: 60.r,
+                backgroundImage: user.photoUrl.isNotEmpty
+                    ? NetworkImage(user.photoUrl)
+                    : const AssetImage('assets/app_logo.png') as ImageProvider,
+                backgroundColor: Colors.grey.shade200,
+              ),
             ),
             Positioned(
               bottom: 0,
               right: 0,
-              child: CircleAvatar(
-                radius: 10.r,
-                backgroundColor: Colors.white,
-                child: Icon(
-                  Icons.edit,
-                  color: Colors.black,
+              child: Container(
+                height: 35,
+                width: 35,
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.black, width: 2),
+                  borderRadius: BorderRadius.circular(100),
+                  color: Colors.blue.withValues(alpha: 0.1),
+                ),
+                child: CircleAvatar(
+                  radius: 10.r,
+                  backgroundColor: Colors.white,
+                  child: Icon(
+                    Icons.edit,
+                    color: Colors.blue,
+                  ),
                 ),
               ),
             ),

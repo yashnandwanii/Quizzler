@@ -16,10 +16,10 @@ class UserRepository extends GetxController {
         "Error",
         "Something went wrong. Try again",
         snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.redAccent.withOpacity(0.1),
+        backgroundColor: Colors.redAccent.withValues(alpha: 0.1),
         colorText: Colors.red,
       );
-      print(e.toString());
+      debugPrint(e.toString());
     }
   }
 
@@ -43,7 +43,7 @@ class UserRepository extends GetxController {
         "Error",
         "Something went wrong. Try again",
         snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.redAccent.withOpacity(0.1),
+        backgroundColor: Colors.redAccent.withValues(alpha: 0.1),
         colorText: Colors.red,
       );
     }

@@ -6,7 +6,6 @@ import 'package:get_storage/get_storage.dart';
 import 'package:lottie/lottie.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:wallpaper_app/controller/dependency_injection.dart';
-import 'package:wallpaper_app/repository/authentication_repository/authentication_repository.dart';
 import 'package:wallpaper_app/views/screens/quiz_splash_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';

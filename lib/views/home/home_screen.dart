@@ -105,6 +105,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 return const Center(child: Text("Could not load user data."));
               }
               final user = snapshot.data!;
+
               return SingleChildScrollView(
                 child: Padding(
                   padding: EdgeInsets.symmetric(horizontal: 10.w),
@@ -238,7 +239,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             SizedBox(height: 4.h),
             Text(
-              user.fullName.split(' ').first, // Show first name
+              user.fullName, // Show first name
               style: GoogleFonts.inter(
                 fontSize: 18.sp,
                 fontWeight: FontWeight.bold,

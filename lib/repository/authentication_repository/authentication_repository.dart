@@ -132,9 +132,8 @@ class AuthenticationRepository extends GetxController {
     }
   }
 
-  // ---------------- EMAIL AUTH ----------------
   Future<UserModel> createUserWithEmailAndPassword(
-      String email, String password) async {
+      String email, String password, String fullName) async {
     _isLoading.value = true;
     try {
       await _auth.createUserWithEmailAndPassword(
@@ -148,9 +147,12 @@ class AuthenticationRepository extends GetxController {
       }
       final userModel = UserModel(
         id: user.uid,
-        email: user.email ?? '',
-        fullName: user.displayName ?? '',
+        email: email,
         password: password,
+        fullName: fullName,
+        photoUrl: '',
+        coins: 0,
+        rank: 0,
       );
       await FirebaseFirestore.instance
           .collection('users')

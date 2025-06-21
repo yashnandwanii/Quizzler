@@ -102,53 +102,55 @@ class _SignUpFormState extends State<SignUpForm> {
                       _passwordController.text.isNotEmpty &&
                       _fullNameController.text.isNotEmpty) {
                     if (formKey.currentState!.validate()) {
-                      final user =
-                          await _authRepo.createUserWithEmailAndPassword(
-                        _emailController.text,
-                        _passwordController.text,
-                      );
-
-                      if (user == null) {
-                        Get.snackbar(
-                          'Sign Up Failed',
-                          'Please check your credentials and try again.',
-                          backgroundColor: Colors.red.shade300,
-                          snackPosition: SnackPosition.BOTTOM,
-                          duration: Duration(seconds: 2),
-                        );
-                        return;
-                      } else {
-                        final box = GetStorage();
-                        box.erase();
-                        box.write('userId', user.id);
-                        box.write('email', _emailController.text);
-                        box.write('password', _passwordController.text);
-                        box.write('fullName', _fullNameController.text);
-                        //save user data to db
-                        await _authRepo.saveUserDataToDb(
+                      try {
+                        final user =
+                            await _authRepo.createUserWithEmailAndPassword(
                           _emailController.text,
-                          _fullNameController.text,
                           _passwordController.text,
+                          _fullNameController.text,
                         );
-                        _authRepo.isLoading.value = false;
-                        _emailController.clear();
-                        _passwordController.clear();
-                        _fullNameController.clear();
 
-                        Get.offAll(
-                          () => const MainTabView(),
-                          transition: Transition.rightToLeft,
-                          duration: const Duration(milliseconds: 500),
-                        );
-                        Future.delayed(const Duration(milliseconds: 600), () {
+                        debugPrint(user.toString());
+
+                        if (user == null) {
                           Get.snackbar(
-                            'Sign Up Successful',
-                            'Welcome to the app!',
-                            backgroundColor: Colors.green.shade300,
-                            duration: const Duration(seconds: 2),
+                            'Sign Up Failed',
+                            'Please check your credentials and try again.',
+                            backgroundColor: Colors.red.shade300,
                             snackPosition: SnackPosition.BOTTOM,
+                            duration: Duration(seconds: 2),
                           );
-                        });
+                          return;
+                        } else {
+                          final box = GetStorage();
+                          box.erase();
+                          box.write('userId', user.id);
+                          box.write('email', _emailController.text);
+
+                          box.write('fullName', _fullNameController.text);
+
+                          _authRepo.isLoading.value = false;
+                          _emailController.clear();
+                          _passwordController.clear();
+                          _fullNameController.clear();
+
+                          Get.offAll(
+                            () => const MainTabView(),
+                            transition: Transition.rightToLeft,
+                            duration: const Duration(milliseconds: 500),
+                          );
+                          Future.delayed(const Duration(milliseconds: 600), () {
+                            Get.snackbar(
+                              'Sign Up Successful',
+                              'Welcome to the app!',
+                              backgroundColor: Colors.green.shade300,
+                              duration: const Duration(seconds: 2),
+                              snackPosition: SnackPosition.BOTTOM,
+                            );
+                          });
+                        }
+                      } catch (e) {
+                        debugPrint(e.toString());
                       }
                     }
                   } else {
