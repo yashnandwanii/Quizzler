@@ -3,7 +3,7 @@
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:wallpaper_app/views/home/home_screen.dart';
-import 'package:wallpaper_app/views/categories/dynamic_categories_screen.dart';
+import 'package:wallpaper_app/views/categories/enhanced_categories_screen.dart';
 import 'package:wallpaper_app/views/Profile/profile_page.dart';
 import 'package:wallpaper_app/views/leaderboard/enhanced_leaderboard_screen.dart';
 import 'package:wallpaper_app/views/quiz_history/quiz_history_screen.dart';
@@ -21,7 +21,7 @@ class _MainTabViewState extends State<MainTabView> {
   // Screens for bottom navigation
   final List<Widget> _screens = [
     const HomeScreen(),
-    const DynamicCategoriesScreen(),
+    const EnhancedCategoriesScreen(),
     const EnhancedLeaderboardScreen(),
     const QuizHistoryScreen(),
     const ProfilePage(),
