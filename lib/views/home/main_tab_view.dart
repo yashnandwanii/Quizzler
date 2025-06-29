@@ -3,9 +3,10 @@
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:wallpaper_app/views/home/home_screen.dart';
-import 'package:wallpaper_app/views/Category/categories_screen.dart';
+import 'package:wallpaper_app/views/categories/dynamic_categories_screen.dart';
 import 'package:wallpaper_app/views/Profile/profile_page.dart';
-import 'package:wallpaper_app/views/screens/leaderboard_screen.dart';
+import 'package:wallpaper_app/views/leaderboard/enhanced_leaderboard_screen.dart';
+import 'package:wallpaper_app/views/quiz_history/quiz_history_screen.dart';
 
 class MainTabView extends StatefulWidget {
   const MainTabView({super.key});
@@ -20,8 +21,9 @@ class _MainTabViewState extends State<MainTabView> {
   // Screens for bottom navigation
   final List<Widget> _screens = [
     const HomeScreen(),
-    const CategoriesScreen(),
-    const LeaderboardScreen(),
+    const DynamicCategoriesScreen(),
+    const EnhancedLeaderboardScreen(),
+    const QuizHistoryScreen(),
     const ProfilePage(),
   ];
 
@@ -46,6 +48,7 @@ class _MainTabViewState extends State<MainTabView> {
           Icon(Icons.home_outlined, size: 30, color: Colors.white),
           Icon(Icons.quiz_outlined, size: 30, color: Colors.white),
           Icon(Icons.leaderboard_outlined, size: 30, color: Colors.white),
+          Icon(Icons.history_outlined, size: 30, color: Colors.white),
           Icon(Icons.person_outline, size: 30, color: Colors.white),
         ],
       ),

@@ -11,6 +11,7 @@ import 'package:wallpaper_app/repository/authentication_repository/authenticatio
 import 'package:wallpaper_app/views/home/main_tab_view.dart';
 import 'package:wallpaper_app/views/screens/quiz_splash_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:wallpaper_app/services/category_service.dart';
 import 'firebase_options.dart';
 
 late final bool isLoggedIn;
@@ -25,6 +26,10 @@ void main() async {
   final box = GetStorage();
   isLoggedIn = box.read('isLoggedIn') == true;
   DependencyInjection.init();
+  
+  // Initialize categories on app start
+  await CategoryService.initializeCategories();
+  
   runApp(const MyApp());
 }
 
