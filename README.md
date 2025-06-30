@@ -1,4 +1,5 @@
-# wallpaper_app
+# Quizzler
+
 
 A new Flutter project.
 
