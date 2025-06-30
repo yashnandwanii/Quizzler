@@ -1,0 +1,41 @@
+# Flutter & Dart
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+build/
+**/doc/api/
+**/ios/Flutter/.last_build_id
+
+# VS Code (optional, remove if you want to share project settings)
+.vscode/
+
+# IntelliJ & Android Studio
+*.iml
+.idea/
+*.ipr
+*.iws
+.env
+*.env
+
+# macOS & system
+.DS_Store
+
+# Temporary
+*.log
+*.pyc
+*.swp
+
+# Android build outputs
+android/app/debug
+android/app/profile
+android/app/release
+
+# iOS build & Firebase junk
+ios/Flutter/flutter_export_environment.sh
+ios/Pods/
+ios/Runner.xcworkspace/
+ios/Runner.xcworkspace/xcuserdata/
+ios/Runner.xcworkspace/xcshareddata/
