@@ -15,9 +15,9 @@
 
 ---
 
-## ✨ What Makes QuizMaster Special?
+## ✨ What Makes Quizzler Special?
 
-QuizMaster isn't just another quiz app—it's a **comprehensive knowledge ecosystem** designed to challenge, educate, and entertain. Built with passion using Flutter and powered by Firebase, it delivers a seamless experience across all devices while keeping your progress synchronized in the cloud.
+Quizzler isn't just another quiz app—it's a **comprehensive knowledge ecosystem** designed to challenge, educate, and entertain. Built with passion using Flutter and powered by Firebase, it delivers a seamless experience across all devices while keeping your progress synchronized in the cloud.
 
 ### 🎯 **Core Philosophy**
 > *"Learning should be as engaging as gaming, as competitive as sports, and as rewarding as achievement."*
@@ -106,7 +106,7 @@ Auth:         Firebase Auth + Google Sign-In
 1. **Clone the repository**
    ```bash
    git clone https://github.com/yourusername/quizmaster.git
-   cd quizmaster
+   cd quizzler
    ```
 
 2. **Install dependencies**
@@ -175,7 +175,7 @@ lib/
 ## 🔥 Advanced Features
 
 ### **🎖️ Achievement System**
-QuizMaster features a sophisticated achievement system that tracks:
+Quizzler features a sophisticated achievement system that tracks:
 - **📈 Progress Milestones**: First quiz, 10th quiz, 100th quiz
 - **💰 Coin Collection**: Earning and spending virtual currency
 - **🎯 Perfect Scores**: Achieving 100% accuracy
@@ -264,24 +264,6 @@ copies or substantial portions of the Software.
 
 ### **🛠️ Open Source Libraries**
 Special thanks to the Flutter community and all the amazing package authors who made this project possible.
-
----
-
-## 📞 Connect With Us
-
-<div align="center">
-
-### **Ready to challenge your mind?**
-
-[![Download on App Store](https://img.shields.io/badge/Download-App%20Store-blue?style=for-the-badge&logo=apple)](https://apps.apple.com)
-[![Get it on Google Play](https://img.shields.io/badge/Download-Google%20Play-green?style=for-the-badge&logo=google-play)](https://play.google.com)
-
----
-
-**📧 Email**: support@quizmaster.app  
-**🐦 Twitter**: [@QuizMasterApp](https://twitter.com/quizmasterapp)  
-**📱 Discord**: [Join our community](https://discord.gg/quizmaster)  
-**🌐 Website**: [www.quizmaster.app](https://www.quizmaster.app)
 
 ---
 
