@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:get/get.dart';
 import 'package:wallpaper_app/views/Quiz/enhanced_quiz_screen.dart';
 import 'package:wallpaper_app/model/quiz_preferences_model.dart';
+import 'package:wallpaper_app/services/gemini_ai_service.dart';
 
 class QuizCard extends StatelessWidget {
   const QuizCard({
@@ -31,7 +32,7 @@ class QuizCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 210.h,
+      height: 245.h,
       width: MediaQuery.of(context).size.width / 1.1,
       padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
@@ -120,13 +121,13 @@ class QuizCard extends StatelessWidget {
               _buildDetailItem(
                 icon: Icons.quiz,
                 text: '${quizzes!} Questions',
-                color: Colors.white70,
+                color: Colors.deepOrange,
               ),
               SizedBox(width: 16.w),
               _buildDetailItem(
                 icon: Icons.timer,
                 text: '${duration!} Time',
-                color: Colors.white70,
+                color: Colors.deepPurple,
               ),
             ],
           ),
@@ -140,7 +141,7 @@ class QuizCard extends StatelessWidget {
               _buildDetailItem(
                 icon: Icons.trending_up,
                 text: 'Medium Level',
-                color: Colors.orange,
+                color: const Color.fromARGB(255, 3, 196, 187),
               ),
               SizedBox(width: 16.w),
               _buildDetailItem(
@@ -160,23 +161,23 @@ class QuizCard extends StatelessWidget {
               _buildDetailItem(
                 icon: Icons.warning,
                 text: '-5 Coins per wrong',
-                color: Colors.red.shade300,
+                color: const Color.fromARGB(255, 228, 4, 4),
               ),
               SizedBox(width: 16.w),
               _buildDetailItem(
-                icon: Icons.speed,
-                text: 'Bonus for speed',
-                color: Colors.blue.shade300,
+                icon: Icons.auto_awesome,
+                text: 'AI Generated',
+                color: const Color.fromARGB(255, 104, 64, 205),
               ),
             ],
           ),
 
-          SizedBox(height: 10.h),
+          SizedBox(height: 18.h),
 
           // Start button
           SizedBox(
             width: double.infinity,
-            height: 30.h,
+            height: 35.h,
             child: ElevatedButton(
               onPressed: () => _startQuizForCategory(),
               style: ElevatedButton.styleFrom(
@@ -213,86 +214,126 @@ class QuizCard extends StatelessWidget {
     required String text,
     required Color color,
   }) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(icon, size: 16.sp, color: color),
-        SizedBox(width: 4.w),
-        Flexible(
-          child: Text(
-            text,
-            style: TextStyle(
-              color: color,
-              fontSize: 11.sp,
-              fontWeight: FontWeight.w500,
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+      decoration: BoxDecoration(
+        color: Colors.white70,
+        borderRadius: BorderRadius.circular(12.r),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 16.sp, color: color),
+          SizedBox(width: 4.w),
+          Flexible(
+            child: Text(
+              text,
+              style: TextStyle(
+                color: color,
+                fontSize: 11.sp,
+                fontWeight: FontWeight.w500,
+              ),
+              overflow: TextOverflow.ellipsis,
             ),
-            overflow: TextOverflow.ellipsis,
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
-  void _startQuizForCategory() {
-    // Map card category to QuizAPI category
-    String apiCategory = '';
-    switch (category!.toLowerCase()) {
-      case 'linux':
-        apiCategory = 'Linux';
-        break;
-      case 'devops':
-        apiCategory = 'DevOps';
-        break;
-      case 'networking':
-        apiCategory = 'Networking';
-        break;
-      case 'code':
-        apiCategory = 'Code';
-        break;
-      case 'cloud':
-        apiCategory = 'Cloud';
-        break;
-      case 'docker':
-        apiCategory = 'Docker';
-        break;
-      case 'kubernetes':
-        apiCategory = 'Kubernetes';
-        break;
-      case 'general':
-        apiCategory = ''; // General knowledge (no specific category)
-        break;
-      case 'random':
-        apiCategory = ''; // Random questions (no specific category)
-        break;
-      default:
-        apiCategory = category!;
+  void _startQuizForCategory() async {
+    // Initialize Gemini AI service if not already done
+    if (!Get.isRegistered<GeminiAIService>()) {
+      Get.put(GeminiAIService());
     }
 
-    final quizCategory = QuizCategory(
-      id: category!.toLowerCase().replaceAll(' ', '_'),
-      name: category!,
-      iconPath: 'assets/computer-science.png',
-      color: backgroundColor?.value ?? 0xFF2196F3,
-      difficulty: 'Medium',
-      quizCount: quizzes!,
-      isActive: true,
-      availableTags: [],
-      apiCategory: apiCategory,
-    );
+    final geminiService = Get.find<GeminiAIService>();
 
-    final preferences = QuizPreferences(
-      difficulty: 'Medium',
-      limit: quizzes!,
-      singleAnswerOnly: false,
-    );
-
-    Get.to(
-      () => EnhancedQuizScreen(
-        category: quizCategory,
-        preferences: preferences,
+    // Show loading dialog
+    Get.dialog(
+      const Center(
+        child: Card(
+          child: Padding(
+            padding: EdgeInsets.all(20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                CircularProgressIndicator(),
+                SizedBox(height: 16),
+                Text('Generating quiz questions with AI...'),
+              ],
+            ),
+          ),
+        ),
       ),
-      transition: Transition.rightToLeft,
-      duration: const Duration(milliseconds: 400),
+      barrierDismissible: false,
     );
+
+    try {
+      // Generate quiz questions using Gemini AI
+      final quizQuestions = await geminiService.generateCustomQuiz(
+        topic: category!,
+        difficulty: 'Medium',
+        numberOfQuestions: quizzes!,
+        specificRequirements:
+            'Create engaging multiple-choice questions suitable for a general audience',
+        language: 'English',
+      );
+
+      // Close loading dialog
+      Get.back();
+
+      if (quizQuestions.isEmpty) {
+        Get.snackbar(
+          'Error',
+          'Failed to generate quiz questions. Please try again.',
+          backgroundColor: Colors.red.shade100,
+          colorText: Colors.red.shade800,
+        );
+        return;
+      }
+
+      // Create quiz category and preferences
+      final quizCategory = QuizCategory(
+        id: category!.toLowerCase().replaceAll(' ', '_'),
+        name: category!,
+        iconPath: 'assets/computer-science.png',
+        color: backgroundColor?.value ?? 0xFF2196F3,
+        difficulty: 'Medium',
+        quizCount: quizzes!,
+        isActive: true,
+        availableTags: [],
+        apiCategory: 'ai_generated',
+      );
+
+      final preferences = QuizPreferences(
+        difficulty: 'Medium',
+        limit: quizzes!,
+        singleAnswerOnly: false,
+      );
+
+      // Navigate to quiz screen with pre-generated questions
+      Get.to(
+        () => EnhancedQuizScreen(
+          category: quizCategory,
+          preferences: preferences,
+          preGeneratedQuestions: quizQuestions,
+        ),
+        transition: Transition.rightToLeft,
+        duration: const Duration(milliseconds: 400),
+      );
+    } catch (e) {
+      // Close loading dialog if still open
+      if (Get.isDialogOpen ?? false) {
+        Get.back();
+      }
+
+      Get.snackbar(
+        'Error',
+        'Failed to generate quiz: $e',
+        backgroundColor: Colors.red.shade100,
+        colorText: Colors.red.shade800,
+      );
+    }
   }
 }
