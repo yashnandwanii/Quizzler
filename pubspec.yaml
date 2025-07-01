@@ -37,7 +37,6 @@ dependencies:
   http: ^1.2.2
   google_fonts: ^6.2.1
   flexify: ^2.1.1
-  share: ^2.0.1
   rename: ^3.0.2
   flutter_launcher_icons: ^0.14.1
   flutter_native_splash: ^2.4.3
@@ -61,6 +60,8 @@ dependencies:
   image_picker: ^1.1.2
   url_launcher: ^6.3.1
   package_info_plus: ^8.1.0
+  firebase_ai: ^2.1.0
+  google_generative_ai: ^0.4.6
   
 dev_dependencies:
   flutter_test:

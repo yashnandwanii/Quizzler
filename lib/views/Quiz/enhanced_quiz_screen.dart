@@ -10,11 +10,13 @@ import 'package:wallpaper_app/services/enhanced_category_service.dart';
 class EnhancedQuizScreen extends StatefulWidget {
   final QuizCategory category;
   final QuizPreferences preferences;
+  final List<QuizModel>? preGeneratedQuestions; // For AI-generated quizzes
 
   const EnhancedQuizScreen({
     super.key,
     required this.category,
     required this.preferences,
+    this.preGeneratedQuestions,
   });
 
   @override
@@ -56,7 +58,18 @@ class _EnhancedQuizScreenState extends State<EnhancedQuizScreen> {
         hasError = false;
       });
 
-      // Fetch quizzes using enhanced API service
+      // Use pre-generated questions if available (for AI quizzes)
+      if (widget.preGeneratedQuestions != null &&
+          widget.preGeneratedQuestions!.isNotEmpty) {
+        quizData = widget.preGeneratedQuestions!;
+        setState(() {
+          isLoading = false;
+        });
+        startBonusTimer();
+        return;
+      }
+
+      // Fetch quizzes using enhanced API service for regular quizzes
       if (widget.category.apiCategory.isNotEmpty) {
         quizData = await EnhancedQuizApiService.fetchQuizzesWithPreferences(
           category: widget.category.apiCategory,

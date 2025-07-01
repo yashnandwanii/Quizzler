@@ -234,24 +234,40 @@ class QuizCard extends StatelessWidget {
   }
 
   void _startQuizForCategory() {
-    // Map card category to QuizAPI category if needed
+    // Map card category to QuizAPI category
     String apiCategory = '';
     switch (category!.toLowerCase()) {
-      case 'general knowledge':
-        apiCategory = '';
-        break;
-      case 'mathematics':
-        apiCategory = 'Math';
-        break;
-      case 'computer science':
-        apiCategory = 'Code';
+      case 'linux':
+        apiCategory = 'Linux';
         break;
       case 'devops':
         apiCategory = 'DevOps';
         break;
+      case 'networking':
+        apiCategory = 'Networking';
+        break;
+      case 'code':
+        apiCategory = 'Code';
+        break;
+      case 'cloud':
+        apiCategory = 'Cloud';
+        break;
+      case 'docker':
+        apiCategory = 'Docker';
+        break;
+      case 'kubernetes':
+        apiCategory = 'Kubernetes';
+        break;
+      case 'general':
+        apiCategory = ''; // General knowledge (no specific category)
+        break;
+      case 'random':
+        apiCategory = ''; // Random questions (no specific category)
+        break;
       default:
         apiCategory = category!;
     }
+
     final quizCategory = QuizCategory(
       id: category!.toLowerCase().replaceAll(' ', '_'),
       name: category!,
@@ -263,11 +279,13 @@ class QuizCard extends StatelessWidget {
       availableTags: [],
       apiCategory: apiCategory,
     );
+
     final preferences = QuizPreferences(
       difficulty: 'Medium',
       limit: quizzes!,
       singleAnswerOnly: false,
     );
+
     Get.to(
       () => EnhancedQuizScreen(
         category: quizCategory,

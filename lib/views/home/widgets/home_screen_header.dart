@@ -32,7 +32,7 @@ class HomeScreenHeader extends StatelessWidget {
             Text(
               user.fullName, // Show first name
               style: GoogleFonts.inter(
-                fontSize: 18.sp,
+                fontSize: 24.sp,
                 fontWeight: FontWeight.bold,
                 color: Colors.black,
               ),

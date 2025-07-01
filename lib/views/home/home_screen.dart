@@ -7,6 +7,7 @@ import 'package:wallpaper_app/repository/authentication_repository/authenticatio
 import 'package:wallpaper_app/repository/user_repository/user_repository.dart';
 import 'package:wallpaper_app/views/home/widgets/home_screen_header.dart';
 import 'package:wallpaper_app/views/home/widgets/swipeable_quiz_stack.dart';
+import 'package:wallpaper_app/views/widgets/custom_quiz_input_card.dart';
 
 class QuizCategory {
   final String name;
@@ -22,31 +23,94 @@ class QuizCategory {
 
 final List<Map<String, dynamic>> quizCards = [
   {
-    'title': 'Quick Knowledge Test',
-    'category': 'General Knowledge',
-    'duration': '3min',
-    'quizzes': 15,
-    'sharedBy': 'Brandon Matrovs',
-    'image': 'https://i.pravatar.cc/150?img=2',
-    'color': const Color(0xFF4A4A4A),
-  },
-  {
-    'title': 'Math Challenge',
-    'category': 'Mathematics',
+    'title': 'Linux Bonanza',
+    'category': 'Linux',
     'duration': '5min',
     'quizzes': 20,
-    'sharedBy': 'Alice Johnson',
-    'image': 'https://i.pravatar.cc/150?img=3',
-    'color': const Color(0xFF2E7D32),
+    'sharedBy': 'Terminal Master',
+    'image': 'https://i.pravatar.cc/150?img=2',
+    'color': const Color(0xFFF39C12),
   },
   {
-    'title': 'Tech Trivia',
-    'category': 'Computer Science',
+    'title': 'DevOps Mastery',
+    'category': 'DevOps',
+    'duration': '6min',
+    'quizzes': 15,
+    'sharedBy': 'Pipeline Pro',
+    'image': 'https://i.pravatar.cc/150?img=3',
+    'color': const Color(0xFFE74C3C),
+  },
+  {
+    'title': 'Network Ninja',
+    'category': 'Networking',
     'duration': '4min',
     'quizzes': 18,
-    'sharedBy': 'John Doe',
+    'sharedBy': 'Router Rick',
     'image': 'https://i.pravatar.cc/150?img=4',
-    'color': const Color(0xFF1565C0),
+    'color': const Color(0xFF3498DB),
+  },
+  {
+    'title': 'Code Crusade',
+    'category': 'Code',
+    'duration': '7min',
+    'quizzes': 25,
+    'sharedBy': 'Bug Hunter',
+    'image': 'https://i.pravatar.cc/150?img=5',
+    'color': const Color(0xFF9B59B6),
+  },
+  {
+    'title': 'Cloud Commander',
+    'category': 'Cloud',
+    'duration': '5min',
+    'quizzes': 20,
+    'sharedBy': 'Sky Walker',
+    'image': 'https://i.pravatar.cc/150?img=6',
+    'color': const Color(0xFF1ABC9C),
+  },
+  {
+    'title': 'Docker Dynamo',
+    'category': 'Docker',
+    'duration': '4min',
+    'quizzes': 16,
+    'sharedBy': 'Container King',
+    'image': 'https://i.pravatar.cc/150?img=7',
+    'color': const Color(0xFF2980B9),
+  },
+  {
+    'title': 'Kubernetes Quest',
+    'category': 'Kubernetes',
+    'duration': '8min',
+    'quizzes': 30,
+    'sharedBy': 'Pod Master',
+    'image': 'https://i.pravatar.cc/150?img=8',
+    'color': const Color(0xFF8E44AD),
+  },
+  {
+    'title': 'Quick Brain Burst',
+    'category': 'General',
+    'duration': '3min',
+    'quizzes': 12,
+    'sharedBy': 'Quiz Genius',
+    'image': 'https://i.pravatar.cc/150?img=9',
+    'color': const Color(0xFF34495E),
+  },
+  {
+    'title': 'Random Knowledge',
+    'category': 'Random',
+    'duration': '6min',
+    'quizzes': 22,
+    'sharedBy': 'Trivia Titan',
+    'image': 'https://i.pravatar.cc/150?img=10',
+    'color': const Color(0xFF16A085),
+  },
+  {
+    'title': 'Tech Titans',
+    'category': 'Linux',
+    'duration': '5min',
+    'quizzes': 18,
+    'sharedBy': 'Open Source',
+    'image': 'https://i.pravatar.cc/150?img=11',
+    'color': const Color(0xFFD35400),
   },
 ];
 
@@ -106,6 +170,23 @@ class _HomeScreenState extends State<HomeScreen> {
                       SizedBox(height: 10.h),
                       HomeScreenHeader(wish: wish, user: user),
                       SizedBox(height: 20.h),
+                      Row(
+                        children: [
+                          Text(
+                            'Personalized Quizzes',
+                            style: GoogleFonts.inter(
+                              fontSize: 20.sp,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.black,
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 10.h),
+                      // AI Quiz Generator Card
+                      const CustomQuizInputCard(),
+                      SizedBox(height: 20.h),
+
                       Row(
                         children: [
                           Text(

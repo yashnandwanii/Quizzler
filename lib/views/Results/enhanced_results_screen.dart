@@ -174,7 +174,7 @@ class _EnhancedResultsScreenState extends State<EnhancedResultsScreen> {
         children: [
           // Coins earned
           Container(
-            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+            padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [Colors.amber.shade600, Colors.orange.shade600],
@@ -406,11 +406,10 @@ class _EnhancedResultsScreenState extends State<EnhancedResultsScreen> {
               child: ElevatedButton(
                 onPressed: () {
                   // Navigate back to category with same preferences
-                  Navigator.of(context).pushAndRemoveUntil(
-                    MaterialPageRoute(
-                      builder: (context) => const MainTabView(),
-                    ),
-                    (route) => false,
+                  Get.offAll(
+                    () => MainTabView(),
+                    transition: Transition.leftToRight,
+                    duration: const Duration(milliseconds: 500),
                   );
                 },
                 style: ElevatedButton.styleFrom(

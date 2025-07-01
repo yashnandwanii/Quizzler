@@ -74,7 +74,7 @@ class _SwipeableQuizStackState extends State<SwipeableQuizStack> {
                     secondaryBackground: Container(
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(20.r),
-                        color: Colors.transparent.withOpacity(0.2),
+                        color: Colors.transparent.withValues(alpha: 0.2),
                       ),
                       alignment: Alignment.centerRight,
                       padding: EdgeInsets.symmetric(horizontal: 20.w),

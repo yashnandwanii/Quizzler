@@ -18,7 +18,6 @@ class MainTabView extends StatefulWidget {
 class _MainTabViewState extends State<MainTabView> {
   int currentIndex = 0;
 
-  // Screens for bottom navigation
   final List<Widget> _screens = [
     const HomeScreen(),
     const CategoriesScreen(),
@@ -31,7 +30,7 @@ class _MainTabViewState extends State<MainTabView> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: _screens[currentIndex], // Dynamically load content based on index
+      body: _screens[currentIndex],
       bottomNavigationBar: CurvedNavigationBar(
         index: currentIndex,
         backgroundColor: Colors.white,

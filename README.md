@@ -53,6 +53,14 @@ Quizzler isn't just another quiz app—it's a **comprehensive knowledge ecosyste
 - **🎨 Visual Polish**: Thoughtful animations and micro-interactions
 - **♿ Accessibility**: Designed for users of all abilities
 
+### 🤖 **AI-Powered Quiz Generation**
+- **🧠 Gemini AI Integration**: Generate custom quizzes on any topic using Google's Gemini AI
+- **🎯 Customizable Parameters**: Choose topic, difficulty, number of questions, and quiz style
+- **📝 Intelligent Question Creation**: AI generates contextually relevant multiple-choice questions
+- **⚡ Instant Generation**: Create personalized quizzes in seconds
+- **🔄 Seamless Integration**: AI-generated quizzes work with all existing features (scoring, achievements, etc.)
+- **🎨 Smart Formatting**: Automatic parsing and formatting of AI responses into quiz format
+
 ---
 
 ## 📱 Screenshots
@@ -79,6 +87,7 @@ Quizzler isn't just another quiz app—it's a **comprehensive knowledge ecosyste
 ```yaml
 Frontend:     Flutter 3.5.4+ (Dart)
 Backend:      Firebase (Firestore, Auth, Storage)
+AI:           Google Gemini AI (firebase_ai)
 State Mgmt:   GetX
 UI/UX:        Custom widgets with ScreenUtil
 Storage:      Cloud Firestore + Local GetStorage
@@ -88,8 +97,8 @@ Auth:         Firebase Auth + Google Sign-In
 ### **Key Dependencies**
 - **🎨 UI/UX**: `google_fonts`, `flutter_screenutil`, `lottie`, `confetti`
 - **⚡ State**: `get`, `get_storage`
-- **🔥 Firebase**: `firebase_core`, `firebase_auth`, `cloud_firestore`
-- **🛠️ Utilities**: `image_picker`, `share_plus`, `url_launcher`
+- **🔥 Firebase**: `firebase_core`, `firebase_auth`, `cloud_firestore`, `firebase_ai`
+- **🛠️ Utilities**: `image_picker`, `share_plus`, `url_launcher`, `flutter_dotenv`
 
 ---
 
@@ -122,8 +131,18 @@ Auth:         Firebase Auth + Google Sign-In
 4. **Environment Configuration**
    ```bash
    # Create .env file in project root
-   echo "ENVIRONMENT=development" > .env
+   cp .env.example .env
    ```
+   
+   **Add your Gemini AI API key to the .env file:**
+   ```env
+   GEMINI_API_KEY=your_actual_gemini_api_key_here
+   ```
+   
+   **Get your Gemini API key:**
+   - Visit [Google AI Studio](https://aistudio.google.com/app/apikey)
+   - Create a new API key
+   - Copy it to your .env file
 
 5. **Run the application**
    ```bash
@@ -154,6 +173,7 @@ lib/
 ├── ⚙️ services/                    # Core business services
 │   ├── 🏆 achievements_service.dart
 │   ├── 🎯 enhanced_category_service.dart
+│   ├── 🤖 gemini_ai_service.dart      # AI quiz generation
 │   ├── 📊 leaderboard_service.dart
 │   ├── 🔔 notification_service.dart
 │   ├── ⚙️ settings_service.dart
@@ -168,6 +188,9 @@ lib/
     ├── 📊 Results/                 # Quiz results
     ├── ⚙️ screens/                 # Settings and other screens
     └── 🧩 widgets/                 # Reusable UI components
+        ├── 🤖 custom_quiz_input_card.dart      # AI quiz input
+        ├── 🎯 custom_quiz_generator_screen.dart # AI quiz form
+        └── 🧠 ai_quiz_screen.dart               # AI quiz gameplay
 ```
 
 ---

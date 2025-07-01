@@ -12,25 +12,82 @@ import 'package:wallpaper_app/views/home/main_tab_view.dart';
 import 'package:wallpaper_app/views/screens/quiz_splash_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:wallpaper_app/services/enhanced_category_service.dart';
+import 'package:wallpaper_app/services/gemini_ai_service.dart';
 import 'firebase_options.dart';
 
 late final bool isLoggedIn;
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  await dotenv.load(fileName: ".env");
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
-  await GetStorage.init();
-  Get.put(AuthenticationRepository());
-  final box = GetStorage();
-  isLoggedIn = box.read('isLoggedIn') == true;
-  DependencyInjection.init();
-  
-  // Initialize enhanced categories on app start
-  await EnhancedCategoryService.initializeEnhancedCategories();
-  
-  runApp(const MyApp());
+  try {
+    WidgetsFlutterBinding.ensureInitialized();
+    await dotenv.load(fileName: ".env");
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+    await GetStorage.init();
+    Get.put(AuthenticationRepository());
+    final box = GetStorage();
+    isLoggedIn = box.read('isLoggedIn') == true;
+    DependencyInjection.init();
+
+    // Initialize enhanced categories on app start
+    await EnhancedCategoryService.initializeEnhancedCategories();
+
+    // Initialize GeminiAI service with error handling
+    try {
+      Get.put(GeminiAIService());
+    } catch (e) {
+      debugPrint('Warning: GeminiAI service initialization failed: $e');
+      // Continue without AI service
+    }
+
+    runApp(const MyApp());
+  } catch (e) {
+    debugPrint('App initialization error: $e');
+    runApp(ErrorApp(error: e.toString()));
+  }
+}
+
+class ErrorApp extends StatelessWidget {
+  final String error;
+  const ErrorApp({super.key, required this.error});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: Scaffold(
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.error, size: 64, color: Colors.red),
+                const SizedBox(height: 16),
+                const Text(
+                  'App Initialization Error',
+                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  error,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(fontSize: 14),
+                ),
+                const SizedBox(height: 32),
+                ElevatedButton(
+                  onPressed: () {
+                    // Restart app
+                    main();
+                  },
+                  child: const Text('Retry'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 class MyApp extends StatelessWidget {

@@ -775,9 +775,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   void _shareApp() {
-    Share.shareUri(
-      Uri.parse(
-          'https://play.google.com/store/apps/details?id=com.example.quizapp'),
+    Share.share(
+      'Check out this amazing Quiz App! Download it from: https://play.google.com/store/apps/details?id=com.example.quizapp',
     );
   }
 

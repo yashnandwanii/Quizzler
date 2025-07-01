@@ -19,6 +19,8 @@ build/
 *.iws
 .env
 *.env
+.env.example
+*.env.example
 
 # macOS & system
 .DS_Store
