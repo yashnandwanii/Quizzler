@@ -1,11 +1,13 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
 import 'package:wallpaper_app/model/quiz_preferences_model.dart';
 import 'package:wallpaper_app/services/enhanced_quiz_api_service.dart';
 import 'package:wallpaper_app/model/quiz_model.dart';
 import 'package:wallpaper_app/views/Results/enhanced_results_screen.dart';
 import 'package:wallpaper_app/services/enhanced_category_service.dart';
+import 'package:wallpaper_app/services/gemini_ai_service.dart';
 
 class EnhancedQuizScreen extends StatefulWidget {
   final QuizCategory category;
@@ -69,18 +71,30 @@ class _EnhancedQuizScreenState extends State<EnhancedQuizScreen> {
         return;
       }
 
-      // Fetch quizzes using enhanced API service for regular quizzes
-      if (widget.category.apiCategory.isNotEmpty) {
-        quizData = await EnhancedQuizApiService.fetchQuizzesWithPreferences(
-          category: widget.category.apiCategory,
-          preferences: widget.preferences,
-        );
-      } else {
-        // For general knowledge or categories without specific API mapping
-        quizData =
-            await EnhancedQuizApiService.fetchRandomQuizzesWithPreferences(
-          preferences: widget.preferences,
-        );
+      // Try to fetch quizzes using enhanced API service for regular quizzes
+      try {
+        if (widget.category.apiCategory.isNotEmpty) {
+          quizData = await EnhancedQuizApiService.fetchQuizzesWithPreferences(
+            category: widget.category.apiCategory,
+            preferences: widget.preferences,
+          );
+        } else {
+          // For general knowledge or categories without specific API mapping
+          quizData =
+              await EnhancedQuizApiService.fetchRandomQuizzesWithPreferences(
+            preferences: widget.preferences,
+          );
+        }
+      } catch (e) {
+        // If API fails, offer fallback to AI-generated questions
+        if (e is ApiServerException ||
+            e is ApiKeyException ||
+            e is TimeoutException) {
+          await _handleAPIFailureWithFallback(e.toString());
+          return;
+        } else {
+          rethrow; // Re-throw other errors
+        }
       }
 
       if (quizData.isEmpty) {
@@ -651,5 +665,195 @@ class _EnhancedQuizScreenState extends State<EnhancedQuizScreen> {
         ],
       ),
     );
+  }
+
+  Future<void> _handleAPIFailureWithFallback(String errorMessage) async {
+    // Show dialog asking user if they want to use AI-generated questions
+    final shouldUseAI = await _showAPIFailureDialog(errorMessage);
+
+    if (shouldUseAI) {
+      await _generateAIFallbackQuestions();
+    } else {
+      setState(() {
+        hasError = true;
+        errorMessage =
+            'Quiz API is currently unavailable. Please try again later.';
+        isLoading = false;
+      });
+    }
+  }
+
+  Future<bool> _showAPIFailureDialog(String errorMessage) async {
+    return await showDialog<bool>(
+          context: context,
+          barrierDismissible: false,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              backgroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16.r),
+              ),
+              title: Row(
+                children: [
+                  Icon(Icons.warning, color: Colors.orange, size: 24.sp),
+                  SizedBox(width: 8.w),
+                  Text(
+                    'API Unavailable',
+                    style: TextStyle(
+                      fontSize: 18.sp,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'The quiz service is temporarily unavailable:',
+                    style: TextStyle(fontSize: 14.sp),
+                  ),
+                  SizedBox(height: 8.h),
+                  Container(
+                    padding: EdgeInsets.all(12.w),
+                    decoration: BoxDecoration(
+                      color: Colors.red.shade50,
+                      borderRadius: BorderRadius.circular(8.r),
+                      border: Border.all(color: Colors.red.shade200),
+                    ),
+                    child: Text(
+                      errorMessage,
+                      style: TextStyle(
+                        fontSize: 12.sp,
+                        color: Colors.red.shade700,
+                        fontStyle: FontStyle.italic,
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 16.h),
+                  Text(
+                    'Would you like to generate quiz questions using AI instead?',
+                    style: TextStyle(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  SizedBox(height: 8.h),
+                  Container(
+                    padding: EdgeInsets.all(12.w),
+                    decoration: BoxDecoration(
+                      color: Colors.blue.shade50,
+                      borderRadius: BorderRadius.circular(8.r),
+                      border: Border.all(color: Colors.blue.shade200),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(Icons.auto_awesome,
+                            color: Colors.blue, size: 16.sp),
+                        SizedBox(width: 8.w),
+                        Expanded(
+                          child: Text(
+                            'AI will generate ${widget.preferences.limit} custom ${widget.category.name} questions',
+                            style: TextStyle(
+                              fontSize: 12.sp,
+                              color: Colors.blue.shade700,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(false),
+                  child: Text(
+                    'Cancel',
+                    style: TextStyle(color: Colors.grey.shade600),
+                  ),
+                ),
+                ElevatedButton(
+                  onPressed: () => Navigator.of(context).pop(true),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8.r),
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.auto_awesome, size: 16.sp),
+                      SizedBox(width: 4.w),
+                      Text('Use AI Quiz'),
+                    ],
+                  ),
+                ),
+              ],
+            );
+          },
+        ) ??
+        false;
+  }
+
+  Future<void> _generateAIFallbackQuestions() async {
+    try {
+      // Initialize Gemini AI service if not already done
+      if (!Get.isRegistered<GeminiAIService>()) {
+        Get.put(GeminiAIService());
+      }
+
+      final geminiService = Get.find<GeminiAIService>();
+
+      // Generate quiz questions using Gemini AI
+      final quizQuestions = await geminiService.generateCustomQuiz(
+        topic: widget.category.name,
+        difficulty: widget.preferences.difficulty,
+        numberOfQuestions: widget.preferences.limit,
+        specificRequirements:
+            'Create engaging multiple-choice questions suitable for a general audience',
+        language: 'English',
+      );
+
+      if (quizQuestions.isEmpty) {
+        setState(() {
+          hasError = true;
+          errorMessage =
+              'Failed to generate AI questions. Please try again later.';
+          isLoading = false;
+        });
+        return;
+      }
+
+      quizData = quizQuestions;
+      setState(() {
+        isLoading = false;
+      });
+
+      // Show success message
+      Get.snackbar(
+        'AI Quiz Generated! 🤖',
+        'Successfully created ${quizQuestions.length} custom questions for ${widget.category.name}',
+        snackPosition: SnackPosition.TOP,
+        backgroundColor: Colors.green.withValues(alpha: 0.9),
+        colorText: Colors.white,
+        duration: const Duration(seconds: 3),
+        margin: EdgeInsets.all(16.w),
+        borderRadius: 12.r,
+      );
+
+      startBonusTimer();
+    } catch (e) {
+      setState(() {
+        hasError = true;
+        errorMessage =
+            'Failed to generate AI questions. Please try again later.';
+        isLoading = false;
+      });
+      debugPrint('AI quiz generation error: $e');
+    }
   }
 }

@@ -82,12 +82,7 @@ flutter_launcher_icons:
 
 flutter_native_splash:
   color: "#ffffff"
-  image: assets/app_logo.png
-  branding: assets/app_logo.png
-  branding_bottom_padding: 24
-  color_dark: "#121212"
-  image_dark: assets/lapp_logo.png
-  branding_dark: assets/app_logo.png
+  color_dark: "#ffffff"
   android: true
   ios: true
 

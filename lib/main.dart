@@ -1,11 +1,9 @@
-import 'package:animated_splash_screen/animated_splash_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:lottie/lottie.dart';
-import 'package:page_transition/page_transition.dart';
 import 'package:wallpaper_app/controller/dependency_injection.dart';
 import 'package:wallpaper_app/repository/authentication_repository/authentication_repository.dart';
 import 'package:wallpaper_app/views/home/main_tab_view.dart';
@@ -29,15 +27,12 @@ void main() async {
     isLoggedIn = box.read('isLoggedIn') == true;
     DependencyInjection.init();
 
-    // Initialize enhanced categories on app start
     await EnhancedCategoryService.initializeEnhancedCategories();
 
-    // Initialize GeminiAI service with error handling
     try {
       Get.put(GeminiAIService());
     } catch (e) {
       debugPrint('Warning: GeminiAI service initialization failed: $e');
-      // Continue without AI service
     }
 
     runApp(const MyApp());
@@ -112,19 +107,46 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class SplashScreen extends StatelessWidget {
+class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
   @override
+  State<SplashScreen> createState() => _SplashScreenState();
+}
+
+class _SplashScreenState extends State<SplashScreen> {
+  @override
+  void initState() {
+    super.initState();
+    _navigateToNextScreen();
+  }
+
+  void _navigateToNextScreen() async {
+    await Future.delayed(
+        const Duration(milliseconds: 2400)); // Wait for animation to complete
+    if (mounted) {
+      Get.off(
+        () => isLoggedIn ? const MainTabView() : const QuizSplashScreen(),
+        transition: Transition.fadeIn,
+        duration: const Duration(milliseconds: 500),
+      );
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return AnimatedSplashScreen(
-      splashIconSize: 400.h,
-      duration: 1200,
-      splash: Lottie.asset('assets/animation.json'),
-      nextScreen: isLoggedIn ? const MainTabView() : const QuizSplashScreen(),
-      splashTransition: SplashTransition.fadeTransition,
-      pageTransitionType: PageTransitionType.bottomToTop,
+    return Scaffold(
       backgroundColor: Colors.white,
+      body: Center(
+        child: SizedBox(
+          width: 400.w,
+          height: 400.h,
+          child: Lottie.asset(
+            'assets/animation.json',
+            fit: BoxFit.contain,
+          ),
+        ),
+      ),
     );
   }
 }

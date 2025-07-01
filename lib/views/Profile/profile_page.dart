@@ -203,7 +203,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     bool success = await Get.find<UserRepository>()
                         .updateUser(updatedUser);
 
-                    if (success) {
+                    if (success && user.id != null) {
                       // Sync the updated profile data to leaderboard
                       await LeaderboardService.syncUserProfileToLeaderboard(
                           user.id!);
@@ -252,6 +252,10 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Widget _buildAchievements(UserModel user) {
+    if (user.id == null) {
+      return const SizedBox.shrink();
+    }
+
     return FutureBuilder<Map<String, int>>(
       future: AchievementsService.getAchievementStats(user.id!),
       builder: (context, snapshot) {
@@ -391,6 +395,10 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Widget _buildQuickAchievements(UserModel user) {
+    if (user.id == null) {
+      return const SizedBox.shrink();
+    }
+
     return FutureBuilder<List<Achievement>>(
       future: AchievementsService.getUserAchievements(user.id!),
       builder: (context, snapshot) {
