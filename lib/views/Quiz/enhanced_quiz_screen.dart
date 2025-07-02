@@ -32,15 +32,17 @@ class _EnhancedQuizScreenState extends State<EnhancedQuizScreen> {
   String errorMessage = '';
 
   int currentIndex = 0;
-  int seconds = 60;
+  int seconds = 60; // Total time for each question
+  int bonusTimeLeft = 15; // Bonus points available for first 15 seconds
   Timer? timer;
   int correctAnswers = 0;
   int incorrectAnswers = 0;
   bool isLoadingOptions = false;
   int totalBonusPoints = 0;
-  int currentBonusPoints = 60;
+  int currentBonusPoints = 15; // Maximum bonus points
   bool isAnswered = false;
   bool showTip = false;
+  bool showLowTimeWarning = false; // Visual warning for low time
 
   List<String> optionsList = [];
   List<Color> optionColors = List.generate(6, (index) => Colors.white);
@@ -129,12 +131,41 @@ class _EnhancedQuizScreenState extends State<EnhancedQuizScreen> {
   void startBonusTimer() {
     timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (seconds == 0) {
+        // Time's up, auto-move to next question
+        if (!isAnswered) {
+          // Mark as incorrect if not answered
+          setState(() {
+            isAnswered = true;
+            incorrectAnswers++;
+
+            final userAnswer = {
+              'question': quizData[currentIndex].question,
+              'description': quizData[currentIndex].description,
+              'tip': quizData[currentIndex].tip,
+              'explanation': quizData[currentIndex].explanation,
+              'userAnswer': 'No answer (Time up)',
+              'correctAnswer': _getCorrectAnswer(quizData[currentIndex]),
+              'isCorrect': false,
+              'bonusPoints': 0,
+              'options': optionsList,
+            };
+            userAnswers.add(userAnswer);
+          });
+        }
         gotoNextQuestion();
       } else {
         setState(() {
           seconds--;
-          if (currentBonusPoints > 0) {
-            currentBonusPoints--;
+
+          // Update low time warning
+          showLowTimeWarning = seconds <= 10;
+
+          // Bonus points available only for first 15 seconds
+          if (bonusTimeLeft > 0) {
+            bonusTimeLeft--;
+            currentBonusPoints = bonusTimeLeft; // Bonus decreases from 15 to 0
+          } else {
+            currentBonusPoints = 0; // No bonus after 15 seconds
           }
         });
       }
@@ -147,10 +178,12 @@ class _EnhancedQuizScreenState extends State<EnhancedQuizScreen> {
       resetOptionColors();
       currentIndex++;
       timer!.cancel();
-      seconds = 60;
-      currentBonusPoints = 60;
+      seconds = 60; // Reset to 60 seconds for next question
+      bonusTimeLeft = 15; // Reset bonus time to 15 seconds
+      currentBonusPoints = 15; // Reset bonus points to maximum
       isAnswered = false;
       showTip = false;
+      showLowTimeWarning = false; // Reset warning
       if (currentIndex < quizData.length) {
         startBonusTimer();
       } else {
@@ -168,8 +201,9 @@ class _EnhancedQuizScreenState extends State<EnhancedQuizScreen> {
     final totalScore = baseScore + totalBonusPoints;
     final coinsEarned = correctAnswers * 10 + (totalBonusPoints ~/ 10);
 
-    //final authRepo = Get.find<AuthenticationRepository>();
-    //final userId = authRepo.firebaseUser.value?.uid;
+    // Calculate total time spent (each question has 60 seconds)
+    final totalTimeAllocated = quizData.length * 60;
+    final timeSpent = totalTimeAllocated - seconds;
 
     Navigator.pushReplacement(
       context,
@@ -185,7 +219,7 @@ class _EnhancedQuizScreenState extends State<EnhancedQuizScreen> {
           totalScore: totalScore,
           coinsEarned: coinsEarned,
           userAnswers: userAnswers,
-          timeSpent: (quizData.length * 60) - seconds,
+          timeSpent: timeSpent,
         ),
       ),
     );
@@ -348,11 +382,22 @@ class _EnhancedQuizScreenState extends State<EnhancedQuizScreen> {
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [
-              Color(widget.category.color),
-              Color(widget.category.color).withValues(alpha: 0.8),
-              Color(widget.category.color).withValues(alpha: 0.6),
-            ],
+            colors: showLowTimeWarning
+                ? [
+                    // Red tint when time is low
+                    Color(widget.category.color).withRed(255),
+                    Color(widget.category.color)
+                        .withRed(255)
+                        .withValues(alpha: 0.8),
+                    Color(widget.category.color)
+                        .withRed(255)
+                        .withValues(alpha: 0.6),
+                  ]
+                : [
+                    Color(widget.category.color),
+                    Color(widget.category.color).withValues(alpha: 0.8),
+                    Color(widget.category.color).withValues(alpha: 0.6),
+                  ],
           ),
         ),
         child: SafeArea(
@@ -383,20 +428,55 @@ class _EnhancedQuizScreenState extends State<EnhancedQuizScreen> {
           onPressed: () => _showExitDialog(),
           icon: const Icon(Icons.close, color: Colors.white, size: 30),
         ),
-        Container(
-          padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
-          decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.2),
-            borderRadius: BorderRadius.circular(20.r),
-          ),
-          child: Text(
-            widget.category.name,
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 14.sp,
-              fontWeight: FontWeight.w500,
+        Row(
+          children: [
+            // Timer display
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
+              decoration: BoxDecoration(
+                color: seconds <= 10
+                    ? Colors.red.withValues(alpha: 0.8)
+                    : Colors.white.withValues(alpha: 0.2),
+                borderRadius: BorderRadius.circular(20.r),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.timer,
+                    color: seconds <= 10 ? Colors.white : Colors.white70,
+                    size: 16,
+                  ),
+                  SizedBox(width: 4.w),
+                  Text(
+                    '${seconds}s',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
+            SizedBox(width: 8.w),
+            // Category display
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.2),
+                borderRadius: BorderRadius.circular(20.r),
+              ),
+              child: Text(
+                widget.category.name,
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+          ],
         ),
         _buildBonusWidget(),
       ],
@@ -431,10 +511,41 @@ class _EnhancedQuizScreenState extends State<EnhancedQuizScreen> {
           ],
         ),
         SizedBox(height: 12.h),
+        // Question progress bar
         LinearProgressIndicator(
           value: (currentIndex + 1) / quizData.length,
           backgroundColor: Colors.white.withValues(alpha: 0.3),
           valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
+        ),
+        SizedBox(height: 8.h),
+        // Timer progress bar
+        Row(
+          children: [
+            Icon(
+              Icons.hourglass_empty,
+              color: Colors.white.withValues(alpha: 0.8),
+              size: 16,
+            ),
+            SizedBox(width: 8.w),
+            Expanded(
+              child: LinearProgressIndicator(
+                value: seconds / 60, // Progress from 60 to 0
+                backgroundColor: Colors.white.withValues(alpha: 0.3),
+                valueColor: AlwaysStoppedAnimation<Color>(
+                  seconds <= 10 ? Colors.red : Colors.green,
+                ),
+              ),
+            ),
+            SizedBox(width: 8.w),
+            Text(
+              '${seconds}s',
+              style: TextStyle(
+                color: Colors.white.withValues(alpha: 0.8),
+                fontSize: 12.sp,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
         ),
       ],
     );
@@ -593,28 +704,42 @@ class _EnhancedQuizScreenState extends State<EnhancedQuizScreen> {
   }
 
   Widget _buildBonusWidget() {
+    final bool bonusActive = bonusTimeLeft > 0;
+    final Color bonusColor = bonusActive ? Colors.amber : Colors.grey;
+
     return Container(
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
         color: Colors.black.withValues(alpha: 0.3),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.amber, width: 2),
+        border: Border.all(color: bonusColor, width: 2),
       ),
       child: Column(
         children: [
-          Text(
-            '$currentBonusPoints',
-            style: const TextStyle(
-              color: Colors.amber,
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-            ),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                bonusActive ? Icons.flash_on : Icons.flash_off,
+                color: bonusColor,
+                size: 16,
+              ),
+              SizedBox(width: 4.w),
+              Text(
+                '$currentBonusPoints',
+                style: TextStyle(
+                  color: bonusColor,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
           ),
-          const Text(
-            'BONUS',
+          Text(
+            bonusActive ? 'BONUS' : 'NO BONUS',
             style: TextStyle(
               color: Colors.white,
-              fontSize: 10,
+              fontSize: 8,
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -628,13 +753,21 @@ class _EnhancedQuizScreenState extends State<EnhancedQuizScreen> {
             ),
             child: FractionallySizedBox(
               alignment: Alignment.centerLeft,
-              widthFactor: currentBonusPoints / 60,
+              widthFactor: bonusActive ? (bonusTimeLeft / 15) : 0,
               child: Container(
                 decoration: BoxDecoration(
-                  color: Colors.amber,
+                  color: bonusColor,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
+            ),
+          ),
+          SizedBox(height: 2.h),
+          Text(
+            bonusActive ? '${bonusTimeLeft}s' : 'Time up',
+            style: TextStyle(
+              color: Colors.white.withValues(alpha: 0.8),
+              fontSize: 8,
             ),
           ),
         ],
@@ -855,5 +988,27 @@ class _EnhancedQuizScreenState extends State<EnhancedQuizScreen> {
       });
       debugPrint('AI quiz generation error: $e');
     }
+  }
+
+  String _getCorrectAnswer(QuizModel quiz) {
+    if (quiz.correctAnswers.answerACorrect == 'true') {
+      return quiz.answers.answerA;
+    }
+    if (quiz.correctAnswers.answerBCorrect == 'true') {
+      return quiz.answers.answerB;
+    }
+    if (quiz.correctAnswers.answerCCorrect == 'true') {
+      return quiz.answers.answerC;
+    }
+    if (quiz.correctAnswers.answerDCorrect == 'true') {
+      return quiz.answers.answerD;
+    }
+    if (quiz.correctAnswers.answerECorrect == 'true') {
+      return quiz.answers.answerE;
+    }
+    if (quiz.correctAnswers.answerFCorrect == 'true') {
+      return quiz.answers.answerF;
+    }
+    return 'Unknown';
   }
 }

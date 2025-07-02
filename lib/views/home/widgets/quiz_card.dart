@@ -260,7 +260,7 @@ class QuizCard extends StatelessWidget {
               children: [
                 CircularProgressIndicator(),
                 SizedBox(height: 16),
-                Text('Generating quiz questions with AI...'),
+                Text('Starting Quiz...'),
               ],
             ),
           ),

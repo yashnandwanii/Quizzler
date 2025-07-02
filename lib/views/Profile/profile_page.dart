@@ -1,6 +1,3 @@
-// Fully integrated ProfilePage with in-dialog avatar selection
-// for your wallpaper_app with GetX and Firestore architecture.
-
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -40,7 +37,6 @@ class _ProfilePageState extends State<ProfilePage> {
       final hasUnlockedAchievements =
           currentAchievements.any((a) => a.isUnlocked);
 
-      // If no achievements are unlocked but user has coins/quizzes, trigger retroactive check
       if (!hasUnlockedAchievements) {
         final newAchievements =
             await AchievementsService.checkAndUnlockRetroactiveAchievements(

@@ -308,7 +308,19 @@ class _QuizHistoryScreenState extends State<QuizHistoryScreen> {
   Widget _buildFilterSection() {
     if (_availableCategories.isEmpty) return const SizedBox();
     return Container(
-      margin: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+      padding: EdgeInsets.all(16.w),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12.r),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      margin: EdgeInsets.symmetric(horizontal: 20.w, vertical: 8.h),
       child: DropdownButtonFormField<String>(
         value: _selectedCategory ?? 'All Categories',
         decoration: InputDecoration(
@@ -318,10 +330,12 @@ class _QuizHistoryScreenState extends State<QuizHistoryScreen> {
         items: [
           DropdownMenuItem(
               value: 'All Categories', child: Text('All Categories')),
-          ..._availableCategories.map((cat) => DropdownMenuItem(
-                value: cat,
-                child: Text(cat),
-              )),
+          ..._availableCategories.map(
+            (cat) => DropdownMenuItem(
+              value: cat,
+              child: Text(cat),
+            ),
+          ),
         ],
         onChanged: (value) {
           setState(() => _selectedCategory = value);
