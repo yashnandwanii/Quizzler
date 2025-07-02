@@ -170,7 +170,7 @@ class _CustomQuizInputCardState extends State<CustomQuizInputCard>
                           ),
                           child: Center(
                             child: Text(
-                              'Tap to Start Creating',
+                              'Tap to Start Quiz',
                               style: GoogleFonts.poppins(
                                 fontSize: 14.sp,
                                 fontWeight: FontWeight.w600,

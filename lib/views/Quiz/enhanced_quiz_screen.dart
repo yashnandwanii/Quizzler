@@ -44,6 +44,11 @@ class _EnhancedQuizScreenState extends State<EnhancedQuizScreen> {
   bool showTip = false;
   bool showLowTimeWarning = false; // Visual warning for low time
 
+  // Time tracking
+  DateTime? quizStartTime;
+  DateTime? currentQuestionStartTime;
+  int totalTimeSpentInSeconds = 0;
+
   List<String> optionsList = [];
   List<Color> optionColors = List.generate(6, (index) => Colors.white);
 
@@ -129,10 +134,21 @@ class _EnhancedQuizScreenState extends State<EnhancedQuizScreen> {
   }
 
   void startBonusTimer() {
+    // Record the start time for this question
+    currentQuestionStartTime = DateTime.now();
+
+    // Set quiz start time if this is the first question
+    if (currentIndex == 0 && quizStartTime == null) {
+      quizStartTime = DateTime.now();
+    }
+
     timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (seconds == 0) {
         // Time's up, auto-move to next question
         if (!isAnswered) {
+          // Record time spent on this question (full 60 seconds)
+          _recordQuestionTime();
+
           // Mark as incorrect if not answered
           setState(() {
             isAnswered = true;
@@ -172,7 +188,20 @@ class _EnhancedQuizScreenState extends State<EnhancedQuizScreen> {
     });
   }
 
+  void _recordQuestionTime() {
+    if (currentQuestionStartTime != null) {
+      final timeSpentOnQuestion =
+          DateTime.now().difference(currentQuestionStartTime!).inSeconds;
+      totalTimeSpentInSeconds += timeSpentOnQuestion;
+    }
+  }
+
   void gotoNextQuestion() {
+    // Record time spent on current question if not already recorded
+    if (!isAnswered) {
+      _recordQuestionTime();
+    }
+
     setState(() {
       isLoadingOptions = false;
       resetOptionColors();
@@ -197,13 +226,14 @@ class _EnhancedQuizScreenState extends State<EnhancedQuizScreen> {
   }
 
   void navigateToResults() async {
+    // Record final time if quiz ends naturally
+    if (currentQuestionStartTime != null && !isAnswered) {
+      _recordQuestionTime();
+    }
+
     final baseScore = correctAnswers * 100;
     final totalScore = baseScore + totalBonusPoints;
     final coinsEarned = correctAnswers * 10 + (totalBonusPoints ~/ 10);
-
-    // Calculate total time spent (each question has 60 seconds)
-    final totalTimeAllocated = quizData.length * 60;
-    final timeSpent = totalTimeAllocated - seconds;
 
     Navigator.pushReplacement(
       context,
@@ -219,7 +249,7 @@ class _EnhancedQuizScreenState extends State<EnhancedQuizScreen> {
           totalScore: totalScore,
           coinsEarned: coinsEarned,
           userAnswers: userAnswers,
-          timeSpent: timeSpent,
+          timeSpent: totalTimeSpentInSeconds, // Use actual time spent
         ),
       ),
     );
@@ -510,43 +540,6 @@ class _EnhancedQuizScreenState extends State<EnhancedQuizScreen> {
             ),
           ],
         ),
-        SizedBox(height: 12.h),
-        // Question progress bar
-        LinearProgressIndicator(
-          value: (currentIndex + 1) / quizData.length,
-          backgroundColor: Colors.white.withValues(alpha: 0.3),
-          valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
-        ),
-        SizedBox(height: 8.h),
-        // Timer progress bar
-        Row(
-          children: [
-            Icon(
-              Icons.hourglass_empty,
-              color: Colors.white.withValues(alpha: 0.8),
-              size: 16,
-            ),
-            SizedBox(width: 8.w),
-            Expanded(
-              child: LinearProgressIndicator(
-                value: seconds / 60, // Progress from 60 to 0
-                backgroundColor: Colors.white.withValues(alpha: 0.3),
-                valueColor: AlwaysStoppedAnimation<Color>(
-                  seconds <= 10 ? Colors.red : Colors.green,
-                ),
-              ),
-            ),
-            SizedBox(width: 8.w),
-            Text(
-              '${seconds}s',
-              style: TextStyle(
-                color: Colors.white.withValues(alpha: 0.8),
-                fontSize: 12.sp,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ],
-        ),
       ],
     );
   }
@@ -635,6 +628,9 @@ class _EnhancedQuizScreenState extends State<EnhancedQuizScreen> {
           onTap: isAnswered
               ? null
               : () {
+                  // Record time spent on this question when user answers
+                  _recordQuestionTime();
+
                   setState(() {
                     isAnswered = true;
 

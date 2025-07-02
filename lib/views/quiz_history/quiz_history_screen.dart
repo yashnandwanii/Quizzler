@@ -5,7 +5,6 @@ import 'package:get/get.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:wallpaper_app/services/quiz_history_service.dart';
 import 'package:wallpaper_app/repository/authentication_repository/authentication_repository.dart';
-import 'package:wallpaper_app/views/quiz_history/quiz_stats_screen.dart';
 import 'package:wallpaper_app/views/quiz_history/quiz_replay_screen.dart';
 
 class QuizHistoryScreen extends StatefulWidget {
@@ -163,28 +162,6 @@ class _QuizHistoryScreenState extends State<QuizHistoryScreen> {
           ),
           const Spacer(),
           GestureDetector(
-            onTap: () {
-              Get.to(
-                () => const QuizStatsScreen(),
-                transition: Transition.rightToLeft,
-                duration: const Duration(milliseconds: 300),
-              );
-            },
-            child: Column(
-              children: [
-                Image.asset('assets/icons/analytics.png',
-                    height: 20.h, width: 20.w, fit: BoxFit.contain),
-                SizedBox(height: 5.h),
-                Text('Stats',
-                    style: GoogleFonts.robotoMono(
-                        fontSize: 8.sp,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white)),
-              ],
-            ),
-          ),
-          SizedBox(width: 25.w),
-          GestureDetector(
             onTap: _loadQuizHistory,
             child: Image.asset('assets/icons/refresh.png',
                 height: 25.h, width: 25.w, fit: BoxFit.contain),
@@ -323,6 +300,7 @@ class _QuizHistoryScreenState extends State<QuizHistoryScreen> {
       margin: EdgeInsets.symmetric(horizontal: 20.w, vertical: 8.h),
       child: DropdownButtonFormField<String>(
         value: _selectedCategory ?? 'All Categories',
+        dropdownColor: Colors.white,
         decoration: InputDecoration(
           labelText: 'Filter by Category',
           border: OutlineInputBorder(borderRadius: BorderRadius.circular(12.r)),

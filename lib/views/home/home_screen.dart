@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:wallpaper_app/model/user_model.dart';
 import 'package:wallpaper_app/repository/authentication_repository/authentication_repository.dart';
 import 'package:wallpaper_app/repository/user_repository/user_repository.dart';
+import 'package:wallpaper_app/services/suggestion_dialog_service.dart';
 import 'package:wallpaper_app/views/home/widgets/home_screen_header.dart';
 import 'package:wallpaper_app/views/home/widgets/swipeable_quiz_stack.dart';
 import 'package:wallpaper_app/views/widgets/custom_quiz_input_card.dart';
@@ -129,6 +130,10 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     getWish();
+    // Show suggestion dialog after the widget has been built
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      SuggestionDialogService.showSuggestionDialog(context);
+    });
   }
 
   void getWish() {
