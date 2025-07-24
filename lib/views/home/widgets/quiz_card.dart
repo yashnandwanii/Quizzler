@@ -32,12 +32,11 @@ class QuizCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 245.h,
       width: MediaQuery.of(context).size.width / 1.1,
-      padding: EdgeInsets.all(16.w),
+      padding: EdgeInsets.all(12.w),
       decoration: BoxDecoration(
         color: backgroundColor,
-        borderRadius: BorderRadius.circular(25.r),
+        borderRadius: BorderRadius.circular(20.r),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.1),
@@ -47,6 +46,7 @@ class QuizCard extends StatelessWidget {
         ],
       ),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
@@ -100,103 +100,117 @@ class QuizCard extends StatelessWidget {
             ],
           ),
 
-          SizedBox(height: 16.h),
+          SizedBox(height: 10.h),
 
           // Quiz title
           Text(
             title!,
             style: GoogleFonts.inter(
-              fontSize: 20.sp,
+              fontSize: 16.sp,
               fontWeight: FontWeight.bold,
               color: Colors.white,
             ),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
           ),
 
-          SizedBox(height: 12.h),
+          SizedBox(height: 8.h),
 
           // Quiz details
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _buildDetailItem(
-                icon: Icons.quiz,
-                text: '${quizzes!} Questions',
-                color: Colors.deepOrange,
+              Expanded(
+                child: _buildDetailItem(
+                  icon: Icons.quiz,
+                  text: '${quizzes!} Questions',
+                  color: Colors.deepOrange,
+                ),
               ),
-              SizedBox(width: 16.w),
-              _buildDetailItem(
-                icon: Icons.timer,
-                text: '${duration!} Time',
-                color: Colors.deepPurple,
+              SizedBox(width: 8.w),
+              Expanded(
+                child: _buildDetailItem(
+                  icon: Icons.timer,
+                  text: '${duration!} Time',
+                  color: Colors.deepPurple,
+                ),
               ),
             ],
           ),
 
-          SizedBox(height: 8.h),
+          SizedBox(height: 6.h),
 
           // Difficulty and rewards
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _buildDetailItem(
-                icon: Icons.trending_up,
-                text: 'Medium Level',
-                color: const Color.fromARGB(255, 3, 196, 187),
+              Expanded(
+                child: _buildDetailItem(
+                  icon: Icons.trending_up,
+                  text: 'Medium Level',
+                  color: const Color.fromARGB(255, 3, 196, 187),
+                ),
               ),
-              SizedBox(width: 16.w),
-              _buildDetailItem(
-                icon: Icons.monetization_on,
-                text: '+10 Coins per correct',
-                color: Colors.green,
+              SizedBox(width: 8.w),
+              Expanded(
+                child: _buildDetailItem(
+                  icon: Icons.monetization_on,
+                  text: '+10 Coins per correct',
+                  color: Colors.green,
+                ),
               ),
             ],
           ),
 
-          SizedBox(height: 8.h),
+          SizedBox(height: 6.h),
 
           // Penalty info
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _buildDetailItem(
-                icon: Icons.warning,
-                text: '-5 Coins per wrong',
-                color: const Color.fromARGB(255, 228, 4, 4),
+              Expanded(
+                child: _buildDetailItem(
+                  icon: Icons.warning,
+                  text: '-5 Coins per wrong',
+                  color: const Color.fromARGB(255, 228, 4, 4),
+                ),
               ),
-              SizedBox(width: 16.w),
-              _buildDetailItem(
-                icon: Icons.auto_awesome,
-                text: 'AI Generated',
-                color: const Color.fromARGB(255, 104, 64, 205),
+              SizedBox(width: 8.w),
+              Expanded(
+                child: _buildDetailItem(
+                  icon: Icons.auto_awesome,
+                  text: 'AI Generated',
+                  color: const Color.fromARGB(255, 104, 64, 205),
+                ),
               ),
             ],
           ),
 
-          SizedBox(height: 18.h),
+          SizedBox(height: 12.h),
 
           // Start button
           SizedBox(
             width: double.infinity,
-            height: 35.h,
+            height: 32.h,
             child: ElevatedButton(
               onPressed: () => _startQuizForCategory(),
               style: ElevatedButton.styleFrom(
-                elevation: 5,
+                elevation: 3,
                 backgroundColor: const Color.fromARGB(255, 41, 30, 255),
                 foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12.r),
+                  borderRadius: BorderRadius.circular(10.r),
                 ),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.play_arrow, size: 18.sp),
-                  SizedBox(width: 8.w),
+                  Icon(Icons.play_arrow, size: 16.sp),
+                  SizedBox(width: 6.w),
                   Text(
                     'Start Quiz',
                     style: TextStyle(
-                      fontSize: 14.sp,
+                      fontSize: 12.sp,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -215,25 +229,26 @@ class QuizCard extends StatelessWidget {
     required Color color,
   }) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+      padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 3.h),
       decoration: BoxDecoration(
         color: Colors.white70,
-        borderRadius: BorderRadius.circular(12.r),
+        borderRadius: BorderRadius.circular(8.r),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 16.sp, color: color),
-          SizedBox(width: 4.w),
+          Icon(icon, size: 12.sp, color: color),
+          SizedBox(width: 3.w),
           Flexible(
             child: Text(
               text,
               style: TextStyle(
                 color: color,
-                fontSize: 11.sp,
+                fontSize: 9.sp,
                 fontWeight: FontWeight.w500,
               ),
               overflow: TextOverflow.ellipsis,
+              maxLines: 1,
             ),
           ),
         ],

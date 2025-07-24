@@ -211,7 +211,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                     }).toList(),
                   ),
 
-                  SizedBox(height: 6.h),
+                  SizedBox(height: 4.h),
 
                   // Multiple Correct Questions Toggle
                   Row(
@@ -346,7 +346,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
               height: 30.h, width: 30.w, fit: BoxFit.contain),
           SizedBox(width: 10.w),
           Text(
-            'Tech Quiz Categories',
+            'Categories',
             style: GoogleFonts.robotoMono(
               fontSize: 20.sp,
               fontWeight: FontWeight.bold,
@@ -435,7 +435,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
 
             Container(
               width: double.infinity,
-              padding: EdgeInsets.all(10.w),
+              padding: EdgeInsets.all(10),
               child: ElevatedButton(
                 onPressed: () => _showQuizPreferencesDialog(category),
                 style: ElevatedButton.styleFrom(

@@ -91,18 +91,36 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ScreenUtilInit(
-      designSize: const Size(360, 690),
+      designSize: const Size(375, 812), // Updated to iPhone X dimensions
       minTextAdapt: true,
-      child: GetMaterialApp(
-        themeMode: ThemeMode.system,
-        theme: ThemeData(
-          primarySwatch: Colors.blue,
-        ),
-        debugShowCheckedModeBanner: false,
-        defaultTransition: Transition.leftToRightWithFade,
-        transitionDuration: const Duration(milliseconds: 500),
-        home: const SplashScreen(),
-      ),
+      splitScreenMode: true,
+      builder: (context, child) {
+        return GetMaterialApp(
+          themeMode: ThemeMode.system,
+          theme: ThemeData(
+            primarySwatch: Colors.blue,
+            // Add text scaling control
+            textTheme: Theme.of(context).textTheme.apply(
+                  fontSizeFactor: 1.0, // Prevent system font scaling
+                ),
+          ),
+          debugShowCheckedModeBanner: false,
+          defaultTransition: Transition.leftToRightWithFade,
+          transitionDuration: const Duration(milliseconds: 500),
+          builder: (context, widget) {
+            return MediaQuery(
+              // Override system text scaling
+              data: MediaQuery.of(context).copyWith(
+                textScaler: TextScaler.linear(
+                  MediaQuery.of(context).textScaleFactor.clamp(0.8, 1.2),
+                ),
+              ),
+              child: widget!,
+            );
+          },
+          home: const SplashScreen(),
+        );
+      },
     );
   }
 }

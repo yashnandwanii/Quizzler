@@ -29,11 +29,25 @@ class AuthenticationRepository extends GetxController {
 
   Future<UserCredential?> signInWithGoogle() async {
     try {
+      _isLoading.value = true;
+
+      // Sign out first to ensure clean state
+      await _googleSignIn.signOut();
+      await _auth.signOut();
+
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
-      if (googleUser == null) return null; // User cancelled the sign-in
+      if (googleUser == null) {
+        _isLoading.value = false;
+        return null; // User cancelled the sign-in
+      }
 
       final GoogleSignInAuthentication googleAuth =
           await googleUser.authentication;
+
+      if (googleAuth.accessToken == null || googleAuth.idToken == null) {
+        _isLoading.value = false;
+        throw Exception('Failed to get authentication tokens');
+      }
 
       final credential = GoogleAuthProvider.credential(
         accessToken: googleAuth.accessToken,
@@ -44,21 +58,44 @@ class AuthenticationRepository extends GetxController {
       final user = userCredential.user;
 
       if (user != null) {
+        // Store login state
+        box.write('isLoggedIn', true);
+
         // Check if user exists in Firestore, if not, create a new user document
-        final userRepo = Get.find<UserRepository>();
-        final doc = await FirebaseFirestore.instance
-            .collection('users')
-            .doc(user.uid)
-            .get();
-        if (!doc.exists) {
-          final newUser = UserModel(
-              id: user.uid,
-              email: user.email ?? '',
-              fullName: user.displayName ?? 'No Name',
-              photoUrl: user.photoURL ?? '',
-              password: "" // Not needed for Google Sign-In
-              );
-          await userRepo.createUser(newUser);
+        try {
+          final userRepo = Get.find<UserRepository>();
+          final doc = await FirebaseFirestore.instance
+              .collection('users')
+              .doc(user.uid)
+              .get();
+          if (!doc.exists) {
+            final newUser = UserModel(
+                id: user.uid,
+                email: user.email ?? '',
+                fullName: user.displayName ?? 'No Name',
+                photoUrl: user.photoURL ?? '',
+                password: "" // Not needed for Google Sign-In
+                );
+            await userRepo.createUser(newUser);
+          }
+
+          _isLoading.value = false;
+          Get.snackbar(
+            'Success',
+            'Welcome ${user.displayName ?? 'User'}!',
+            backgroundColor: Colors.green.shade100,
+            colorText: Colors.green.shade800,
+          );
+
+          Get.offAll(
+            () => const MainTabView(),
+            transition: Transition.downToUp,
+            duration: const Duration(milliseconds: 500),
+          );
+        } catch (e) {
+          debugPrint('Error creating user document: $e');
+          // Continue even if user document creation fails
+          _isLoading.value = false;
           Get.offAll(
             () => const MainTabView(),
             transition: Transition.downToUp,
@@ -66,10 +103,42 @@ class AuthenticationRepository extends GetxController {
           );
         }
       }
+
       return userCredential;
+    } on FirebaseAuthException catch (e) {
+      _isLoading.value = false;
+      debugPrint('Firebase Auth Error: ${e.code} - ${e.message}');
+      String message = switch (e.code) {
+        'account-exists-with-different-credential' =>
+          'An account already exists with a different sign-in method.',
+        'invalid-credential' => 'The credential is invalid or has expired.',
+        'operation-not-allowed' =>
+          'Google Sign-In is not enabled for this project.',
+        'user-disabled' => 'This user account has been disabled.',
+        'user-not-found' => 'No user found for this account.',
+        'wrong-password' => 'Wrong password provided.',
+        'invalid-verification-code' => 'The verification code is invalid.',
+        'invalid-verification-id' => 'The verification ID is invalid.',
+        _ => e.message ?? 'An unknown error occurred during sign-in.',
+      };
+      Get.snackbar(
+        'Sign-In Failed',
+        message,
+        backgroundColor: Colors.red.shade100,
+        colorText: Colors.red.shade800,
+        duration: const Duration(seconds: 4),
+      );
+      return null;
     } catch (e) {
+      _isLoading.value = false;
       debugPrint('Google Sign-In Error: $e');
-      Get.snackbar('Error', 'Google Sign-In failed. Please try again.');
+      Get.snackbar(
+        'Error',
+        'Google Sign-In failed. Please check your internet connection and try again.',
+        backgroundColor: Colors.red.shade100,
+        colorText: Colors.red.shade800,
+        duration: const Duration(seconds: 4),
+      );
       return null;
     }
   }
