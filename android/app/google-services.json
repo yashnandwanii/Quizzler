@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "359395339058-vo7cc4ve81c2rv1eqhf35ehb8rpb5udj.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.yash.quizNight",
+            "certificate_hash": "92008f242204f5c74acac47cc12bd94093f1b95e"
+          }
+        },
+        {
           "client_id": "359395339058-rehqmj0qujr8k2c6vhc3atcnnq07bfvl.apps.googleusercontent.com",
           "client_type": 3
         }
