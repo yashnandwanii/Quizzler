@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:wallpaper_app/views/home/home_screen.dart';
+import 'package:quizzler/model/quiz_preferences_model.dart';
 
-class quizListItem extends StatelessWidget {
-  const quizListItem({
+class QuizListItem extends StatelessWidget {
+  const QuizListItem({
     super.key,
     required this.category,
   });
@@ -21,7 +21,7 @@ class quizListItem extends StatelessWidget {
         borderRadius: BorderRadius.circular(20.r),
         boxShadow: [
           BoxShadow(
-            color: Colors.blue.withOpacity(0.3),
+            color: Colors.blue.withValues(alpha: 0.3),
             blurRadius: 10,
             offset: const Offset(0, 5),
           )

@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:wallpaper_app/common/constant.dart';
-import 'package:wallpaper_app/model/quiz_preferences_model.dart';
-import 'package:wallpaper_app/services/gemini_ai_service.dart';
-import 'package:wallpaper_app/views/Quiz/enhanced_quiz_screen.dart';
+import 'package:quizzler/common/constant.dart';
+import 'package:quizzler/model/quiz_preferences_model.dart';
+import 'package:quizzler/services/gemini_ai_service.dart';
+import 'package:quizzler/views/Quiz/enhanced_quiz_screen.dart';
 
 class CustomQuizGeneratorScreen extends StatefulWidget {
   const CustomQuizGeneratorScreen({super.key});
@@ -202,10 +202,10 @@ class _CustomQuizGeneratorScreenState extends State<CustomQuizGeneratorScreen>
                   width: double.infinity,
                   padding: EdgeInsets.all(20.w),
                   decoration: BoxDecoration(
-                    gradient: LinearGradient(
+                    gradient: const LinearGradient(
                       colors: [
-                        const Color(0xFF6C63FF),
-                        const Color(0xFF8B5CF6),
+                        Color(0xFF6C63FF),
+                        Color(0xFF8B5CF6),
                       ],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
@@ -213,7 +213,7 @@ class _CustomQuizGeneratorScreenState extends State<CustomQuizGeneratorScreen>
                     borderRadius: BorderRadius.circular(16.r),
                     boxShadow: [
                       BoxShadow(
-                        color: const Color(0xFF6C63FF).withOpacity(0.3),
+                        color: const Color(0xFF6C63FF).withValues(alpha: 0.3),
                         blurRadius: 10,
                         offset: const Offset(0, 5),
                       ),
@@ -241,7 +241,7 @@ class _CustomQuizGeneratorScreenState extends State<CustomQuizGeneratorScreen>
                         'Create personalized quizzes on any topic using advanced AI',
                         style: GoogleFonts.inter(
                           fontSize: 14.sp,
-                          color: Colors.white.withOpacity(0.9),
+                          color: Colors.white.withValues(alpha: 0.9),
                         ),
                       ),
                     ],
@@ -409,7 +409,7 @@ class _CustomQuizGeneratorScreenState extends State<CustomQuizGeneratorScreen>
                 boxShadow: isSelected
                     ? [
                         BoxShadow(
-                          color: difficultyColor.withOpacity(0.3),
+                          color: difficultyColor.withValues(alpha: 0.3),
                           blurRadius: 8,
                           offset: const Offset(0, 2),
                         ),
@@ -460,7 +460,7 @@ class _CustomQuizGeneratorScreenState extends State<CustomQuizGeneratorScreen>
                 boxShadow: isSelected
                     ? [
                         BoxShadow(
-                          color: const Color(0xFF6C63FF).withOpacity(0.3),
+                          color: const Color(0xFF6C63FF).withValues(alpha: 0.3),
                           blurRadius: 8,
                           offset: const Offset(0, 2),
                         ),
@@ -548,7 +548,7 @@ class _CustomQuizGeneratorScreenState extends State<CustomQuizGeneratorScreen>
             borderRadius: BorderRadius.circular(16.r),
           ),
           elevation: 8,
-          shadowColor: const Color(0xFF6C63FF).withOpacity(0.4),
+          shadowColor: const Color(0xFF6C63FF).withValues(alpha: 0.4),
         ),
         child: _isGenerating
             ? Row(
@@ -557,7 +557,7 @@ class _CustomQuizGeneratorScreenState extends State<CustomQuizGeneratorScreen>
                   SizedBox(
                     width: 20.w,
                     height: 20.h,
-                    child: CircularProgressIndicator(
+                    child: const CircularProgressIndicator(
                       strokeWidth: 2,
                       valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                     ),

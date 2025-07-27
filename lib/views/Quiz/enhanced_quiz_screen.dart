@@ -2,12 +2,12 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:wallpaper_app/model/quiz_preferences_model.dart';
-import 'package:wallpaper_app/services/enhanced_quiz_api_service.dart';
-import 'package:wallpaper_app/model/quiz_model.dart';
-import 'package:wallpaper_app/views/Results/enhanced_results_screen.dart';
-import 'package:wallpaper_app/services/enhanced_category_service.dart';
-import 'package:wallpaper_app/services/gemini_ai_service.dart';
+import 'package:quizzler/model/quiz_model.dart';
+import 'package:quizzler/model/quiz_preferences_model.dart';
+import 'package:quizzler/services/enhanced_category_service.dart';
+import 'package:quizzler/services/enhanced_quiz_api_service.dart';
+import 'package:quizzler/services/gemini_ai_service.dart';
+import 'package:quizzler/views/Results/enhanced_results_screen.dart';
 
 class EnhancedQuizScreen extends StatefulWidget {
   final QuizCategory category;

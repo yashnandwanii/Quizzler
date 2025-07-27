@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:get/get.dart';
-import 'package:wallpaper_app/model/quiz_preferences_model.dart';
-import 'package:wallpaper_app/services/quiz_preferences_service.dart';
-import 'package:wallpaper_app/views/Quiz/enhanced_quiz_screen.dart';
+import 'package:quizzler/model/quiz_preferences_model.dart';
+import 'package:quizzler/services/quiz_preferences_service.dart';
+import 'package:quizzler/views/Quiz/enhanced_quiz_screen.dart';
 
 class QuizPreferencesScreen extends StatefulWidget {
   final QuizCategory category;

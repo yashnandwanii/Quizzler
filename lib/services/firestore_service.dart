@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:wallpaper_app/model/quiz_model.dart';
-import 'package:wallpaper_app/model/user_model.dart';
+import 'package:quizzler/model/user_model.dart';
+import 'package:quizzler/model/quiz_model.dart';
 
 class FirestoreService {
   static final FirebaseFirestore _firestore = FirebaseFirestore.instance;

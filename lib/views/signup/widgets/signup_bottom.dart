@@ -2,8 +2,8 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:wallpaper_app/repository/authentication_repository/authentication_repository.dart';
-import 'package:wallpaper_app/views/login/login_screen.dart';
+import 'package:quizzler/repository/authentication_repository/authentication_repository.dart';
+import 'package:quizzler/views/login/login_screen.dart';
 
 class SignupBottom extends StatelessWidget {
   const SignupBottom({
@@ -29,7 +29,7 @@ class SignupBottom extends StatelessWidget {
           width: double.infinity,
           child: OutlinedButton.icon(
             icon: Image(
-              image: AssetImage('assets/google_logo.png'),
+              image: const AssetImage('assets/google_logo.png'),
               height: 16.h,
             ),
             style: ElevatedButton.styleFrom(
@@ -75,7 +75,7 @@ class SignupBottom extends StatelessWidget {
                     // Navigate to Login Screen
 
                     Get.to(
-                      () => LoginScreen(),
+                      () => const LoginScreen(),
                       transition: Transition.rightToLeft,
                       duration: const Duration(milliseconds: 300),
                     );

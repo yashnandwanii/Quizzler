@@ -25,7 +25,7 @@ class _SwipeableQuizStackState extends State<SwipeableQuizStack> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 270.h,
+      height: 300.h,
       width: double.infinity,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20.r),

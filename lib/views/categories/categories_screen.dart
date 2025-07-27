@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:get/get.dart';
-import 'package:wallpaper_app/common/constant.dart';
-import 'package:wallpaper_app/views/Quiz/enhanced_quiz_screen.dart';
-import 'package:wallpaper_app/model/quiz_preferences_model.dart';
+import 'package:quizzler/common/constant.dart';
+import 'package:quizzler/model/quiz_preferences_model.dart';
+
+import 'package:quizzler/views/Quiz/enhanced_quiz_screen.dart';
 
 class CategoriesScreen extends StatefulWidget {
   const CategoriesScreen({super.key});
@@ -414,7 +415,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                       child: Image.network(category['image'],
                           fit: BoxFit.cover, width: 50.w, height: 50.h,
                           errorBuilder: (context, error, stackTrace) {
-                        return Icon(Icons.error);
+                        return const Icon(Icons.error);
                       })),
                   SizedBox(height: 6.h),
                   // Title
@@ -435,7 +436,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
 
             Container(
               width: double.infinity,
-              padding: EdgeInsets.all(10),
+              padding: const EdgeInsets.all(10),
               child: ElevatedButton(
                 onPressed: () => _showQuizPreferencesDialog(category),
                 style: ElevatedButton.styleFrom(

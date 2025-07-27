@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:wallpaper_app/services/achievements_service.dart';
-import 'package:wallpaper_app/repository/authentication_repository/authentication_repository.dart';
+
 import 'package:confetti/confetti.dart';
+import 'package:quizzler/repository/authentication_repository/authentication_repository.dart';
+import 'package:quizzler/services/achievements_service.dart';
 
 class AchievementsScreen extends StatefulWidget {
   const AchievementsScreen({super.key});
@@ -26,7 +27,8 @@ class _AchievementsScreenState extends State<AchievementsScreen>
   void initState() {
     super.initState();
     _tabController = TabController(length: 4, vsync: this);
-    _confettiController = ConfettiController(duration: Duration(seconds: 2));
+    _confettiController =
+        ConfettiController(duration: const Duration(seconds: 2));
     _loadAchievements();
   }
 
@@ -177,7 +179,7 @@ class _AchievementsScreenState extends State<AchievementsScreen>
       margin: EdgeInsets.all(16.w),
       padding: EdgeInsets.all(20.w),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
+        gradient: const LinearGradient(
           colors: [Colors.deepPurple, Colors.purpleAccent],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -502,7 +504,7 @@ class _AchievementsScreenState extends State<AchievementsScreen>
                             ),
                           ),
                           if (isUnlocked && achievement.unlockedAt != null) ...[
-                            Spacer(),
+                            const Spacer(),
                             Text(
                               'Unlocked ${_formatDate(achievement.unlockedAt!)}',
                               style: GoogleFonts.poppins(

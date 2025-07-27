@@ -3,9 +3,9 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:get/get.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:wallpaper_app/services/quiz_history_service.dart';
-import 'package:wallpaper_app/repository/authentication_repository/authentication_repository.dart';
-import 'package:wallpaper_app/views/quiz_history/quiz_replay_screen.dart';
+import 'package:quizzler/repository/authentication_repository/authentication_repository.dart';
+import 'package:quizzler/services/quiz_history_service.dart';
+import 'package:quizzler/views/quiz_history/quiz_replay_screen.dart';
 
 class QuizHistoryScreen extends StatefulWidget {
   const QuizHistoryScreen({super.key});

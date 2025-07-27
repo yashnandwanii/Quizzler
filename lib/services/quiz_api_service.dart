@@ -2,9 +2,9 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:http/http.dart' as http;
-import 'package:wallpaper_app/model/quiz_model.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:quizzler/model/quiz_model.dart';
 
 class QuizApiService {
   static const String baseUrl = "https://quizapi.io/api/v1/questions";

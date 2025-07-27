@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:wallpaper_app/views/login/login_screen.dart';
-import 'package:wallpaper_app/views/signup/signup_screen.dart';
+import 'package:quizzler/views/login/login_screen.dart';
+import 'package:quizzler/views/signup/signup_screen.dart';
 
 class QuizSplashScreen extends StatelessWidget {
   const QuizSplashScreen({super.key});
@@ -20,8 +20,8 @@ class QuizSplashScreen extends StatelessWidget {
             end: Alignment.bottomCenter,
             colors: [
               Colors.blueAccent.shade100,
-              Color.fromARGB(255, 22, 91, 88),
-              Color.fromARGB(199, 22, 91, 88),
+              const Color.fromARGB(255, 22, 91, 88),
+              const Color.fromARGB(199, 22, 91, 88),
             ],
           ),
         ),

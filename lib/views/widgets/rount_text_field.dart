@@ -32,14 +32,14 @@ class RoundTextField extends StatelessWidget {
         fillColor: Colors.white,
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10.r),
-          borderSide: BorderSide(
+          borderSide: const BorderSide(
             color: Colors.green, // Border color when focused
             width: 2.0,
           ),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10.r),
-          borderSide: BorderSide(
+          borderSide: const BorderSide(
             color: Colors.grey, // Border color when NOT focused
             width: 1.0,
           ),

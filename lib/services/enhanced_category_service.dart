@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:wallpaper_app/model/quiz_preferences_model.dart';
+import 'package:quizzler/model/quiz_preferences_model.dart';
 
 class EnhancedCategoryService {
   static final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -18,7 +18,7 @@ class EnhancedCategoryService {
 
       // Enhanced categories with QuizAPI.io mapping
       final enhancedCategories = [
-        QuizCategory(
+        const QuizCategory(
           id: 'linux',
           name: 'Linux',
           iconPath: 'assets/computer-science.png',
@@ -35,7 +35,7 @@ class EnhancedCategoryService {
           ],
           apiCategory: 'Linux',
         ),
-        QuizCategory(
+        const QuizCategory(
           id: 'devops',
           name: 'DevOps',
           iconPath: 'assets/gadgets.png',
@@ -52,7 +52,7 @@ class EnhancedCategoryService {
           ],
           apiCategory: 'DevOps',
         ),
-        QuizCategory(
+        const QuizCategory(
           id: 'networking',
           name: 'Networking',
           iconPath: 'assets/physics.png',
@@ -69,7 +69,7 @@ class EnhancedCategoryService {
           ],
           apiCategory: 'Networking',
         ),
-        QuizCategory(
+        const QuizCategory(
           id: 'programming',
           name: 'Programming',
           iconPath: 'assets/computer-science.png',
@@ -86,7 +86,7 @@ class EnhancedCategoryService {
           ],
           apiCategory: 'Code',
         ),
-        QuizCategory(
+        const QuizCategory(
           id: 'cloud',
           name: 'Cloud Computing',
           iconPath: 'assets/gadgets.png',
@@ -97,7 +97,7 @@ class EnhancedCategoryService {
           availableTags: ['aws', 'azure', 'gcp', 'serverless', 'storage'],
           apiCategory: 'Cloud',
         ),
-        QuizCategory(
+        const QuizCategory(
           id: 'docker',
           name: 'Docker',
           iconPath: 'assets/gadgets.png',
@@ -114,7 +114,7 @@ class EnhancedCategoryService {
           ],
           apiCategory: 'Docker',
         ),
-        QuizCategory(
+        const QuizCategory(
           id: 'kubernetes',
           name: 'Kubernetes',
           iconPath: 'assets/gadgets.png',
@@ -131,7 +131,7 @@ class EnhancedCategoryService {
           ],
           apiCategory: 'Kubernetes',
         ),
-        QuizCategory(
+        const QuizCategory(
           id: 'general_knowledge',
           name: 'General Knowledge',
           iconPath: 'assets/school.png',

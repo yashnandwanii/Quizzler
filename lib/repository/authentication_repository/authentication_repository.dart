@@ -3,11 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:wallpaper_app/model/user_model.dart';
-import 'package:wallpaper_app/views/home/main_tab_view.dart';
-import 'package:wallpaper_app/views/screens/quiz_splash_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:wallpaper_app/repository/user_repository/user_repository.dart';
+import 'package:quizzler/model/user_model.dart';
+import 'package:quizzler/repository/user_repository/user_repository.dart';
+import 'package:quizzler/views/home/main_tab_view.dart';
+import 'package:quizzler/views/screens/quiz_splash_screen.dart';
 
 class AuthenticationRepository extends GetxController {
   static AuthenticationRepository get instance => Get.find();

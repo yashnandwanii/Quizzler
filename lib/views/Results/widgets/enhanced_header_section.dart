@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:wallpaper_app/model/quiz_preferences_model.dart';
+import 'package:quizzler/model/quiz_preferences_model.dart';
 
 class EnhancedHeaderSection extends StatelessWidget {
   const EnhancedHeaderSection({

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:wallpaper_app/model/user_model.dart';
-import 'package:wallpaper_app/repository/user_repository/user_repository.dart';
+import 'package:quizzler/model/user_model.dart';
+import 'package:quizzler/repository/user_repository/user_repository.dart';
 
 class UpdateProfileScreen extends StatefulWidget {
   final UserModel user;

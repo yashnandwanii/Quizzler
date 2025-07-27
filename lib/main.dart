@@ -3,16 +3,16 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
-import 'package:lottie/lottie.dart';
-import 'package:wallpaper_app/controller/dependency_injection.dart';
-import 'package:wallpaper_app/repository/authentication_repository/authentication_repository.dart';
-import 'package:wallpaper_app/views/home/main_tab_view.dart';
-import 'package:wallpaper_app/views/screens/quiz_splash_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:wallpaper_app/services/enhanced_category_service.dart';
-import 'package:wallpaper_app/services/gemini_ai_service.dart';
-import 'package:wallpaper_app/services/settings_service.dart';
+import 'package:quizzler/controller/dependency_injection.dart';
+import 'package:quizzler/repository/authentication_repository/authentication_repository.dart';
+import 'package:quizzler/services/enhanced_category_service.dart';
+import 'package:quizzler/services/gemini_ai_service.dart';
+import 'package:quizzler/services/settings_service.dart';
+import 'package:quizzler/views/home/main_tab_view.dart';
+import 'package:quizzler/views/screens/quiz_splash_screen.dart';
 import 'firebase_options.dart';
+import 'package:lottie/lottie.dart';
 
 late final bool isLoggedIn;
 void main() async {
@@ -102,44 +102,46 @@ class MyApp extends StatelessWidget {
       minTextAdapt: true,
       splitScreenMode: true,
       builder: (context, child) {
-        return Obx(() => GetMaterialApp(
-              themeMode: ThemeMode.light,
-              theme: ThemeData(
-                useMaterial3: true,
-                primarySwatch: Colors.blue,
+        return Obx(
+          () => GetMaterialApp(
+            themeMode: ThemeMode.light,
+            theme: ThemeData(
+              useMaterial3: true,
+              primarySwatch: Colors.blue,
+              brightness: Brightness.light,
+              colorScheme: ColorScheme.fromSeed(
+                seedColor: Colors.indigo,
                 brightness: Brightness.light,
-                colorScheme: ColorScheme.fromSeed(
-                  seedColor: Colors.indigo,
-                  brightness: Brightness.light,
-                ),
-                textTheme: Theme.of(context).textTheme.apply(
-                      fontSizeFactor: settingsService.fontSizeScale,
-                    ),
-                appBarTheme: const AppBarTheme(
-                  backgroundColor: Colors.indigo,
-                  foregroundColor: Colors.white,
-                  elevation: 0,
-                ),
               ),
-              debugShowCheckedModeBanner: false,
-              defaultTransition: Transition.leftToRightWithFade,
-              transitionDuration: Duration(
-                milliseconds: settingsService.animationsEnabled ? 500 : 200,
-              ),
-              builder: (context, widget) {
-                return MediaQuery(
-                  data: MediaQuery.of(context).copyWith(
-                    textScaler: TextScaler.linear(
-                      (MediaQuery.of(context).textScaleFactor *
-                              settingsService.fontSizeScale)
-                          .clamp(0.8, 1.5),
-                    ),
+              textTheme: Theme.of(context).textTheme.apply(
+                    fontSizeFactor: settingsService.fontSizeScale,
                   ),
-                  child: widget!,
-                );
-              },
-              home: const SplashScreen(),
-            ));
+              appBarTheme: const AppBarTheme(
+                backgroundColor: Colors.indigo,
+                foregroundColor: Colors.white,
+                elevation: 0,
+              ),
+            ),
+            debugShowCheckedModeBanner: false,
+            defaultTransition: Transition.leftToRightWithFade,
+            transitionDuration: Duration(
+              milliseconds: settingsService.animationsEnabled ? 500 : 200,
+            ),
+            builder: (context, widget) {
+              return MediaQuery(
+                data: MediaQuery.of(context).copyWith(
+                  textScaler: TextScaler.linear(
+                    (MediaQuery.of(context).textScaleFactor *
+                            settingsService.fontSizeScale)
+                        .clamp(0.8, 1.5),
+                  ),
+                ),
+                child: widget!,
+              );
+            },
+            home: const SplashScreen(),
+          ),
+        );
       },
     );
   }

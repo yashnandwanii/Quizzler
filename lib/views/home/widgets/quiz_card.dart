@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:get/get.dart';
-import 'package:wallpaper_app/views/Quiz/enhanced_quiz_screen.dart';
-import 'package:wallpaper_app/model/quiz_preferences_model.dart';
-import 'package:wallpaper_app/services/gemini_ai_service.dart';
+import 'package:quizzler/services/gemini_ai_service.dart';
+import 'package:quizzler/views/Quiz/enhanced_quiz_screen.dart';
+import 'package:quizzler/model/quiz_preferences_model.dart';
 
 class QuizCard extends StatelessWidget {
   const QuizCard({
@@ -32,7 +32,8 @@ class QuizCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: MediaQuery.of(context).size.width / 1.1,
+      height: 250.h,
+      width: MediaQuery.of(context).size.width / 1.05,
       padding: EdgeInsets.all(12.w),
       decoration: BoxDecoration(
         color: backgroundColor,
@@ -61,7 +62,7 @@ class QuizCard extends StatelessWidget {
                   category!,
                   style: GoogleFonts.inter(
                     fontWeight: FontWeight.bold,
-                    fontSize: 12.sp,
+                    fontSize: 14.sp,
                   ),
                 ),
               ),
@@ -77,7 +78,7 @@ class QuizCard extends StatelessWidget {
                   style: GoogleFonts.inter(
                     fontWeight: FontWeight.bold,
                     color: Colors.white,
-                    fontSize: 12.sp,
+                    fontSize: 14.sp,
                   ),
                 ),
               ),
@@ -92,7 +93,7 @@ class QuizCard extends StatelessWidget {
                   'Featured',
                   style: TextStyle(
                     color: Colors.white,
-                    fontSize: 10.sp,
+                    fontSize: 12.sp,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -106,7 +107,7 @@ class QuizCard extends StatelessWidget {
           Text(
             title!,
             style: GoogleFonts.inter(
-              fontSize: 16.sp,
+              fontSize: 20.sp,
               fontWeight: FontWeight.bold,
               color: Colors.white,
             ),
@@ -186,12 +187,12 @@ class QuizCard extends StatelessWidget {
             ],
           ),
 
-          SizedBox(height: 12.h),
+          SizedBox(height: 16.h),
 
           // Start button
           SizedBox(
             width: double.infinity,
-            height: 32.h,
+            height: 38.h,
             child: ElevatedButton(
               onPressed: () => _startQuizForCategory(),
               style: ElevatedButton.styleFrom(
@@ -205,12 +206,12 @@ class QuizCard extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.play_arrow, size: 16.sp),
+                  Icon(Icons.play_arrow, size: 20.sp),
                   SizedBox(width: 6.w),
                   Text(
                     'Start Quiz',
                     style: TextStyle(
-                      fontSize: 12.sp,
+                      fontSize: 18.sp,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -237,14 +238,14 @@ class QuizCard extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 12.sp, color: color),
+          Icon(icon, size: 14.sp, color: color),
           SizedBox(width: 3.w),
           Flexible(
             child: Text(
               text,
               style: TextStyle(
                 color: color,
-                fontSize: 9.sp,
+                fontSize: 12.sp,
                 fontWeight: FontWeight.w500,
               ),
               overflow: TextOverflow.ellipsis,

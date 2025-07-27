@@ -4,8 +4,8 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:wallpaper_app/repository/authentication_repository/authentication_repository.dart';
-import 'package:wallpaper_app/services/settings_service.dart';
+import 'package:quizzler/repository/authentication_repository/authentication_repository.dart';
+import 'package:quizzler/services/settings_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
@@ -909,7 +909,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   void _contactSupport() {
-    final emailUrl =
+    const emailUrl =
         'mailto:support@quizapp.com?subject=Quiz App Support&body=Describe your issue here...';
     _launchUrl(emailUrl);
   }

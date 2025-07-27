@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:wallpaper_app/model/quiz_preferences_model.dart';
+import 'package:quizzler/model/quiz_preferences_model.dart';
 
 class EnhancedQuestionCard extends StatefulWidget {
   final Map<String, dynamic> answer;

@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
-import 'package:wallpaper_app/services/gemini_ai_service.dart';
+import 'package:quizzler/services/gemini_ai_service.dart';
 
 void main() {
   group('GeminiAI Service Tests', () {

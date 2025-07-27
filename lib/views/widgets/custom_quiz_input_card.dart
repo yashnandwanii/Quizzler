@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:wallpaper_app/services/gemini_ai_service.dart';
-import 'package:wallpaper_app/views/widgets/custom_quiz_generator_screen.dart';
+import 'package:quizzler/services/gemini_ai_service.dart';
+import 'package:quizzler/views/widgets/custom_quiz_generator_screen.dart';
 
 class CustomQuizInputCard extends StatefulWidget {
   const CustomQuizInputCard({super.key});

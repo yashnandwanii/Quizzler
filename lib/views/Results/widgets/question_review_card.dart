@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:wallpaper_app/views/Results/widgets/answer_section.dart';
-import 'package:wallpaper_app/views/Results/widgets/info_section.dart';
-import 'package:wallpaper_app/views/Results/widgets/options_section.dart';
+import 'package:quizzler/views/Results/widgets/answer_section.dart';
+import 'package:quizzler/views/Results/widgets/info_section.dart';
+import 'package:quizzler/views/Results/widgets/options_section.dart';
 
 class QuestionReviewCard extends StatefulWidget {
   final int questionNumber;
@@ -147,7 +147,7 @@ class _QuestionReviewCardState extends State<QuestionReviewCard> {
                   ],
 
                   // Options
-                  optionsSection(widget: widget),
+                  OptionsSection(widget: widget),
                   SizedBox(height: 12.h),
 
                   // User's answer
@@ -196,7 +196,7 @@ class _QuestionReviewCardState extends State<QuestionReviewCard> {
                     ),
                     child: Row(
                       children: [
-                        Icon(Icons.star, color: Colors.amber, size: 16),
+                        const Icon(Icons.star, color: Colors.amber, size: 16),
                         SizedBox(width: 8.w),
                         Text(
                           'Bonus Points: ${widget.bonusPoints}',

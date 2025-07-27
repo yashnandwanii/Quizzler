@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:wallpaper_app/model/user_model.dart';
-import 'package:wallpaper_app/repository/authentication_repository/authentication_repository.dart';
-import 'package:wallpaper_app/repository/user_repository/user_repository.dart';
-import 'package:wallpaper_app/services/suggestion_dialog_service.dart';
-import 'package:wallpaper_app/views/home/widgets/home_screen_header.dart';
-import 'package:wallpaper_app/views/home/widgets/swipeable_quiz_stack.dart';
-import 'package:wallpaper_app/views/widgets/custom_quiz_input_card.dart';
+import 'package:quizzler/services/suggestion_dialog_service.dart';
+import 'package:quizzler/views/home/widgets/home_screen_header.dart';
+import 'package:quizzler/views/home/widgets/swipeable_quiz_stack.dart';
+import 'package:quizzler/repository/user_repository/user_repository.dart';
+import 'package:quizzler/model/user_model.dart';
+import 'package:quizzler/repository/authentication_repository/authentication_repository.dart';
+import 'package:quizzler/views/widgets/custom_quiz_input_card.dart';
 
 class QuizCategory {
   final String name;

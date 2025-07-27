@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:wallpaper_app/services/leaderboard_service.dart';
+import 'package:quizzler/services/leaderboard_service.dart';
 
 class EnhancedLeaderboardScreen extends StatefulWidget {
   const EnhancedLeaderboardScreen({super.key});
@@ -142,7 +142,7 @@ class _EnhancedLeaderboardScreenState extends State<EnhancedLeaderboardScreen> {
                 children: [
                   Icon(Icons.refresh, size: 18.sp),
                   SizedBox(width: 8.w),
-                  Text('Refresh'),
+                  const Text('Refresh'),
                 ],
               ),
             ),
@@ -171,7 +171,7 @@ class _EnhancedLeaderboardScreenState extends State<EnhancedLeaderboardScreen> {
                   borderRadius: BorderRadius.circular(12.r),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.05),
+                      color: Colors.black.withValues(alpha: 0.05),
                       blurRadius: 4,
                       offset: const Offset(0, 2),
                     ),
@@ -213,17 +213,12 @@ class _EnhancedLeaderboardScreenState extends State<EnhancedLeaderboardScreen> {
                     (entry) =>
                         _buildRegularLeaderboardTile(entry.value, entry.key),
                   )
-                  .toList()
             else
               // If less than 3 users, show all as regular tiles
-              ...leaderboard
-                  .asMap()
-                  .entries
-                  .map(
+              ...leaderboard.asMap().entries.map(
                     (entry) =>
                         _buildRegularLeaderboardTile(entry.value, entry.key),
-                  )
-                  .toList(),
+                  ),
 
             SizedBox(height: 100.h), // Bottom padding for navigation
           ],

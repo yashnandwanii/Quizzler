@@ -3,16 +3,16 @@ import 'package:confetti/confetti.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:get/get.dart';
-import 'package:wallpaper_app/model/quiz_preferences_model.dart';
-import 'package:wallpaper_app/services/leaderboard_service.dart';
-import 'package:wallpaper_app/services/achievements_service.dart';
-import 'package:wallpaper_app/services/daily_challenge_service.dart';
-import 'package:wallpaper_app/repository/authentication_repository/authentication_repository.dart';
-import 'package:wallpaper_app/views/Results/widgets/enhanced_header_section.dart';
-import 'package:wallpaper_app/views/Results/widgets/enhanced_question_review_section.dart';
-import 'package:wallpaper_app/views/home/main_tab_view.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:wallpaper_app/services/firestore_service.dart';
+import 'package:quizzler/model/quiz_preferences_model.dart';
+import 'package:quizzler/repository/authentication_repository/authentication_repository.dart';
+import 'package:quizzler/services/achievements_service.dart';
+import 'package:quizzler/services/daily_challenge_service.dart';
+import 'package:quizzler/services/firestore_service.dart';
+import 'package:quizzler/services/leaderboard_service.dart';
+import 'package:quizzler/views/Results/widgets/enhanced_header_section.dart';
+import 'package:quizzler/views/Results/widgets/enhanced_question_review_section.dart';
+import 'package:quizzler/views/home/main_tab_view.dart';
 
 class EnhancedResultsScreen extends StatefulWidget {
   final QuizCategory category;

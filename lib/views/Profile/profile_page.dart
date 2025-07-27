@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:wallpaper_app/common/constant.dart';
-import 'package:wallpaper_app/model/user_model.dart';
-import 'package:wallpaper_app/repository/authentication_repository/authentication_repository.dart';
-import 'package:wallpaper_app/repository/user_repository/user_repository.dart';
-import 'package:wallpaper_app/views/screens/settings_screen.dart';
-import 'package:wallpaper_app/services/leaderboard_service.dart';
-import 'package:wallpaper_app/services/achievements_service.dart';
-import 'package:wallpaper_app/views/achievements/achievements_screen.dart';
+import 'package:quizzler/common/constant.dart';
+import 'package:quizzler/model/user_model.dart';
+import 'package:quizzler/repository/authentication_repository/authentication_repository.dart';
+import 'package:quizzler/repository/user_repository/user_repository.dart';
+import 'package:quizzler/services/achievements_service.dart';
+import 'package:quizzler/services/leaderboard_service.dart';
+import 'package:quizzler/views/achievements/achievements_screen.dart';
+import 'package:quizzler/views/screens/settings_screen.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});

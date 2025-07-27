@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:wallpaper_app/model/user_model.dart';
+import 'package:quizzler/model/user_model.dart';
 
 class HomeScreenHeader extends StatelessWidget {
   const HomeScreenHeader({
@@ -43,7 +43,7 @@ class HomeScreenHeader extends StatelessWidget {
           radius: 20.r,
           backgroundImage: user.photoUrl.isNotEmpty
               ? NetworkImage(user.photoUrl)
-              : NetworkImage(
+              : const NetworkImage(
                   'https://cdn.pixabay.com/photo/2014/06/27/16/47/person-378368_1280.png',
                 ),
         ),

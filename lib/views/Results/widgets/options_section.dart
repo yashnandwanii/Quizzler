@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:wallpaper_app/views/Results/widgets/question_review_card.dart';
+import 'package:quizzler/views/Results/widgets/question_review_card.dart';
 
-class optionsSection extends StatelessWidget {
-  const optionsSection({
+class OptionsSection extends StatelessWidget {
+  const OptionsSection({
     super.key,
     required this.widget,
   });
@@ -75,7 +75,7 @@ class optionsSection extends StatelessWidget {
                     size: 16,
                   ),
                 if (isCorrectAnswer)
-                  Icon(
+                  const Icon(
                     Icons.check_circle,
                     color: Colors.green,
                     size: 16,

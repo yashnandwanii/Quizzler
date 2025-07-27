@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:wallpaper_app/services/achievements_service.dart';
-import 'package:wallpaper_app/views/achievements/achievements_screen.dart';
-import 'package:wallpaper_app/repository/authentication_repository/authentication_repository.dart';
+import 'package:quizzler/repository/authentication_repository/authentication_repository.dart';
+import 'package:quizzler/services/achievements_service.dart';
+import 'package:quizzler/views/achievements/achievements_screen.dart';
 
 class MotivationalBanner extends StatefulWidget {
   const MotivationalBanner({super.key});

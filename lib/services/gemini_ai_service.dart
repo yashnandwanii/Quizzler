@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 import 'package:get/get.dart';
-import 'package:wallpaper_app/model/quiz_model.dart';
-import 'package:wallpaper_app/model/quiz_preferences_model.dart';
+import 'package:quizzler/model/quiz_model.dart';
+import 'package:quizzler/model/quiz_preferences_model.dart';
 
 class GeminiAIService extends GetxController {
   late final GenerativeModel _model;

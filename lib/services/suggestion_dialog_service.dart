@@ -4,9 +4,9 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:wallpaper_app/model/quiz_preferences_model.dart';
-import 'package:wallpaper_app/views/Quiz/enhanced_quiz_screen.dart';
-import 'package:wallpaper_app/views/quiz_preferences/quiz_preferences_screen.dart';
+import 'package:quizzler/model/quiz_preferences_model.dart';
+import 'package:quizzler/views/Quiz/enhanced_quiz_screen.dart';
+import 'package:quizzler/views/quiz_preferences/quiz_preferences_screen.dart';
 
 class SuggestionDialogService {
   static const String _lastShownKey = 'last_suggestion_shown';
@@ -385,7 +385,7 @@ class _SuggestionDialogState extends State<_SuggestionDialog>
                                   },
                                   style: OutlinedButton.styleFrom(
                                     foregroundColor: Colors.white,
-                                    side: BorderSide(
+                                    side: const BorderSide(
                                         color: Colors.white, width: 1.5),
                                     padding:
                                         EdgeInsets.symmetric(vertical: 14.h),
@@ -454,7 +454,7 @@ class _SuggestionDialogState extends State<_SuggestionDialog>
       apiCategory: widget.category['apiCategory'],
     );
 
-    final preferences = const QuizPreferences(
+    const preferences = QuizPreferences(
       difficulty: 'Medium',
       limit: 10,
       singleAnswerOnly: false,

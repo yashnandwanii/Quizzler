@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:wallpaper_app/views/Results/widgets/question_review_card.dart';
+import 'package:quizzler/views/Results/widgets/question_review_card.dart';
 
 class QuestionCard extends StatelessWidget {
   const QuestionCard({

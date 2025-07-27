@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:get/get.dart';
-import 'package:wallpaper_app/views/categories/categories_screen.dart';
+import 'package:quizzler/views/categories/categories_screen.dart';
 
 class CategoriesShowcase extends StatelessWidget {
   const CategoriesShowcase({super.key});

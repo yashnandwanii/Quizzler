@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get_storage/get_storage.dart';
-import 'package:wallpaper_app/model/quiz_preferences_model.dart';
+import 'package:quizzler/model/quiz_preferences_model.dart';
 
 class QuizPreferencesService {
   static final GetStorage _storage = GetStorage();

@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:wallpaper_app/services/daily_challenge_service.dart';
-import 'package:wallpaper_app/repository/authentication_repository/authentication_repository.dart';
+import 'package:quizzler/repository/authentication_repository/authentication_repository.dart';
+import 'package:quizzler/services/daily_challenge_service.dart';
 
 class DailyChallengesWidget extends StatefulWidget {
   const DailyChallengesWidget({super.key});

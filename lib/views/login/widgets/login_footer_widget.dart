@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
-import 'package:wallpaper_app/repository/authentication_repository/authentication_repository.dart';
-import 'package:wallpaper_app/views/home/main_tab_view.dart';
-import 'package:wallpaper_app/views/signup/signup_screen.dart';
+import 'package:quizzler/repository/authentication_repository/authentication_repository.dart';
+import 'package:quizzler/views/home/main_tab_view.dart';
+import 'package:quizzler/views/signup/signup_screen.dart';
 
 class LoginFooterWidget extends StatelessWidget {
   const LoginFooterWidget({

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:wallpaper_app/common/constant.dart';
-import 'package:wallpaper_app/views/signup/widgets/signup_bottom.dart';
-import 'package:wallpaper_app/views/signup/widgets/signup_form.dart';
+import 'package:quizzler/common/constant.dart';
+import 'package:quizzler/views/signup/widgets/signup_bottom.dart';
+import 'package:quizzler/views/signup/widgets/signup_form.dart';
 
 class SignupScreen extends StatelessWidget {
   const SignupScreen({super.key});
@@ -24,8 +24,8 @@ class SignupScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Image(
-                image: const AssetImage(
+              const Image(
+                image: AssetImage(
                   'assets/image1.png',
                 ),
                 height: height * 0.35,

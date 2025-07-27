@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:wallpaper_app/services/settings_service.dart';
+import 'package:quizzler/services/settings_service.dart';
 
 class NotificationService extends GetxController {
   final SettingsService _settingsService = Get.find<SettingsService>();

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:wallpaper_app/model/quiz_preferences_model.dart';
-import 'package:wallpaper_app/views/Results/widgets/enhanced_question_card.dart';
+import 'package:quizzler/model/quiz_preferences_model.dart';
+import 'package:quizzler/views/Results/widgets/enhanced_question_card.dart';
 
 class EnhancedQuestionReviewSection extends StatelessWidget {
   const EnhancedQuestionReviewSection({

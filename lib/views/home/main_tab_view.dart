@@ -1,12 +1,12 @@
 // ignore_for_file: library_private_types_in_public_api
 
-import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:flutter/material.dart';
-import 'package:wallpaper_app/views/home/home_screen.dart';
-import 'package:wallpaper_app/views/Profile/profile_page.dart';
-import 'package:wallpaper_app/views/leaderboard/enhanced_leaderboard_screen.dart';
-import 'package:wallpaper_app/views/quiz_history/quiz_history_screen.dart';
-import 'package:wallpaper_app/views/categories/categories_screen.dart';
+import 'package:quizzler/views/Profile/profile_page.dart';
+import 'package:quizzler/views/categories/categories_screen.dart';
+import 'package:quizzler/views/home/home_screen.dart';
+import 'package:quizzler/views/leaderboard/enhanced_leaderboard_screen.dart';
+import 'package:quizzler/views/quiz_history/quiz_history_screen.dart';
+import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 
 class MainTabView extends StatefulWidget {
   const MainTabView({super.key});

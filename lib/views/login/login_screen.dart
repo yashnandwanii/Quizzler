@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:wallpaper_app/common/constant.dart';
-import 'package:wallpaper_app/views/login/widgets/login_footer_widget.dart';
-import 'package:wallpaper_app/views/login/widgets/login_form.dart';
+import 'package:quizzler/common/constant.dart';
+import 'package:quizzler/views/login/widgets/login_footer_widget.dart';
+import 'package:quizzler/views/login/widgets/login_form.dart';
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
