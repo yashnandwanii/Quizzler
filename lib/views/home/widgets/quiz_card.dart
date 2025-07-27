@@ -33,7 +33,7 @@ class QuizCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       height: 250.h,
-      width: MediaQuery.of(context).size.width / 1.05,
+      width: MediaQuery.of(context).size.width / 1.06,
       padding: EdgeInsets.all(12.w),
       decoration: BoxDecoration(
         color: backgroundColor,

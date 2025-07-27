@@ -81,7 +81,6 @@ class _SwipeableQuizStackState extends State<SwipeableQuizStack> {
                           const Icon(Icons.arrow_forward, color: Colors.green),
                     ),
                     child: QuizCard(
-                      context: context,
                       title: card['title'],
                       category: card['category'],
                       duration: card['duration'],
@@ -89,6 +88,7 @@ class _SwipeableQuizStackState extends State<SwipeableQuizStack> {
                       sharedBy: card['sharedBy'],
                       avatarUrl: card['image'],
                       backgroundColor: card['color'],
+                      context: context,
                     ),
                   ),
                 ),
