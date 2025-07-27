@@ -42,18 +42,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey.shade50,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text(
           'Settings',
           style: GoogleFonts.poppins(
             fontWeight: FontWeight.bold,
-            color: Colors.white,
           ),
         ),
-        backgroundColor: Colors.indigo,
+        backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
+        foregroundColor: Theme.of(context).appBarTheme.foregroundColor,
         elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(16.w),
@@ -92,7 +91,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
         style: GoogleFonts.poppins(
           fontSize: 18.sp,
           fontWeight: FontWeight.bold,
-          color: Colors.indigo,
+          color: Theme.of(context).brightness == Brightness.dark
+              ? Colors.white
+              : Colors.indigo,
         ),
       ),
     );
@@ -101,7 +102,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Widget _buildGameSettingsSection() {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(12.r),
         boxShadow: [
           BoxShadow(
@@ -147,7 +148,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Widget _buildAudioSection() {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(12.r),
         boxShadow: [
           BoxShadow(
@@ -165,6 +166,32 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 Icons.volume_up,
                 _settingsService.soundEnabled,
                 (value) => _settingsService.toggleSound(value),
+              )),
+          _buildDivider(),
+          Obx(() => _buildSliderTile(
+                'Sound Volume',
+                'Adjust sound effects volume',
+                Icons.volume_down,
+                _settingsService.soundVolume,
+                (value) => _settingsService.changeSoundVolume(value),
+                enabled: _settingsService.soundEnabled,
+              )),
+          _buildDivider(),
+          Obx(() => _buildSwitchTile(
+                'Background Music',
+                'Play ambient music during quizzes',
+                Icons.music_note,
+                _settingsService.musicEnabled,
+                (value) => _settingsService.toggleMusic(value),
+              )),
+          _buildDivider(),
+          Obx(() => _buildSliderTile(
+                'Music Volume',
+                'Adjust background music volume',
+                Icons.music_off,
+                _settingsService.musicVolume,
+                (value) => _settingsService.changeMusicVolume(value),
+                enabled: _settingsService.musicEnabled,
               )),
           _buildDivider(),
           Obx(() => _buildSwitchTile(
@@ -190,7 +217,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Widget _buildPreferencesSection() {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(12.r),
         boxShadow: [
           BoxShadow(
@@ -218,19 +245,30 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 },
               )),
           _buildDivider(),
+          Obx(() => _buildSliderTile(
+                'Font Size',
+                'Adjust text size for better readability',
+                Icons.font_download,
+                _settingsService.fontSizeScale,
+                (value) => _settingsService.changeFontSize(value),
+                min: 0.8,
+                max: 1.5,
+              )),
+          _buildDivider(),
           Obx(() => _buildSwitchTile(
-                'Dark Mode',
-                'Use dark theme for better night viewing',
-                Icons.dark_mode,
-                _settingsService.darkModeEnabled,
-                (value) {
-                  _settingsService.toggleDarkMode(value);
-                  Get.snackbar(
-                    'Theme Changed',
-                    'Theme applied successfully',
-                    snackPosition: SnackPosition.BOTTOM,
-                  );
-                },
+                'Animations',
+                'Enable smooth transitions and animations',
+                Icons.animation,
+                _settingsService.animationsEnabled,
+                (value) => _settingsService.toggleAnimations(value),
+              )),
+          _buildDivider(),
+          Obx(() => _buildSwitchTile(
+                'Auto-play Quizzes',
+                'Automatically start next question',
+                Icons.play_circle_outline,
+                _settingsService.autoPlayEnabled,
+                (value) => _settingsService.toggleAutoPlay(value),
               )),
         ],
       ),
@@ -240,7 +278,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Widget _buildDataSection() {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(12.r),
         boxShadow: [
           BoxShadow(
@@ -280,7 +318,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Widget _buildAccountSection() {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(12.r),
         boxShadow: [
           BoxShadow(
@@ -329,7 +367,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Widget _buildSupportSection() {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(12.r),
         boxShadow: [
           BoxShadow(
@@ -383,7 +421,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
     Function(bool) onChanged,
   ) {
     return ListTile(
-      leading: Icon(icon, color: Colors.indigo),
+      leading: Icon(
+        icon,
+        color: Theme.of(context).brightness == Brightness.dark
+            ? Colors.blue.shade300
+            : Colors.indigo,
+      ),
       title: Text(
         title,
         style: GoogleFonts.poppins(
@@ -401,7 +444,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
       trailing: Switch(
         value: value,
         onChanged: onChanged,
-        activeColor: Colors.indigo,
+        activeColor: Theme.of(context).brightness == Brightness.dark
+            ? Colors.blue.shade300
+            : Colors.indigo,
       ),
     );
   }
@@ -416,7 +461,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return ListTile(
       leading: Icon(
         icon,
-        color: isDestructive ? Colors.red : Colors.indigo,
+        color: isDestructive
+            ? Colors.red
+            : (Theme.of(context).brightness == Brightness.dark
+                ? Colors.blue.shade300
+                : Colors.indigo),
       ),
       title: Text(
         title,
@@ -451,7 +500,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
     Function(String) onChanged,
   ) {
     return ListTile(
-      leading: Icon(icon, color: Colors.indigo),
+      leading: Icon(
+        icon,
+        color: Theme.of(context).brightness == Brightness.dark
+            ? Colors.blue.shade300
+            : Colors.indigo,
+      ),
       title: Text(
         title,
         style: GoogleFonts.poppins(
@@ -484,7 +538,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Widget _buildTimeLimitTile() {
     return Obx(() => ListTile(
-          leading: const Icon(Icons.timer, color: Colors.indigo),
+          leading: Icon(
+            Icons.timer,
+            color: Theme.of(context).brightness == Brightness.dark
+                ? Colors.blue.shade300
+                : Colors.indigo,
+          ),
           title: Text(
             'Question Time Limit',
             style: GoogleFonts.poppins(
@@ -533,7 +592,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Widget _buildInfoTile(String title, String value) {
     return ListTile(
-      leading: const Icon(Icons.info_outline, color: Colors.indigo),
+      leading: Icon(
+        Icons.info_outline,
+        color: Theme.of(context).brightness == Brightness.dark
+            ? Colors.blue.shade300
+            : Colors.indigo,
+      ),
       title: Text(
         title,
         style: GoogleFonts.poppins(
@@ -548,6 +612,63 @@ class _SettingsScreenState extends State<SettingsScreen> {
           color: Colors.grey.shade600,
           fontWeight: FontWeight.w500,
         ),
+      ),
+    );
+  }
+
+  Widget _buildSliderTile(
+    String title,
+    String subtitle,
+    IconData icon,
+    double value,
+    Function(double) onChanged, {
+    double min = 0.0,
+    double max = 1.0,
+    bool enabled = true,
+  }) {
+    return ListTile(
+      leading: Icon(
+        icon,
+        color: enabled
+            ? (Theme.of(context).brightness == Brightness.dark
+                ? Colors.blue.shade300
+                : Colors.indigo)
+            : Colors.grey.shade400,
+      ),
+      title: Text(
+        title,
+        style: GoogleFonts.poppins(
+          fontSize: 16.sp,
+          fontWeight: FontWeight.w500,
+          color: enabled ? null : Colors.grey.shade400,
+        ),
+      ),
+      subtitle: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            subtitle,
+            style: GoogleFonts.poppins(
+              fontSize: 12.sp,
+              color: Colors.grey.shade600,
+            ),
+          ),
+          SizedBox(height: 8.h),
+          Slider(
+            value: value.clamp(min, max),
+            min: min,
+            max: max,
+            divisions: ((max - min) * 10).round(),
+            label: min == 0.8 && max == 1.5
+                ? '${(value * 100).round()}%'
+                : '${(value * 100).round()}%',
+            onChanged: enabled ? onChanged : null,
+            activeColor: Theme.of(context).brightness == Brightness.dark
+                ? Colors.blue.shade300
+                : Colors.indigo,
+            inactiveColor: Colors.grey.shade300,
+          ),
+        ],
       ),
     );
   }
@@ -819,7 +940,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
         'sound_enabled': _settingsService.soundEnabled,
         'vibration_enabled': _settingsService.vibrationEnabled,
         'notifications_enabled': _settingsService.notificationsEnabled,
-        'dark_mode_enabled': _settingsService.darkModeEnabled,
         'auto_submit_enabled': _settingsService.autoSubmitEnabled,
         'show_hints_enabled': _settingsService.showHintsEnabled,
         'selected_language': _settingsService.selectedLanguage,

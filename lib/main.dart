@@ -11,6 +11,7 @@ import 'package:wallpaper_app/views/screens/quiz_splash_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:wallpaper_app/services/enhanced_category_service.dart';
 import 'package:wallpaper_app/services/gemini_ai_service.dart';
+import 'package:wallpaper_app/services/settings_service.dart';
 import 'firebase_options.dart';
 
 late final bool isLoggedIn;
@@ -23,6 +24,10 @@ void main() async {
     );
     await GetStorage.init();
     Get.put(AuthenticationRepository());
+
+    // Initialize SettingsService early
+    Get.put(SettingsService());
+
     final box = GetStorage();
     isLoggedIn = box.read('isLoggedIn') == true;
     DependencyInjection.init();
@@ -90,36 +95,51 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final settingsService = Get.find<SettingsService>();
+
     return ScreenUtilInit(
       designSize: const Size(375, 812), // Updated to iPhone X dimensions
       minTextAdapt: true,
       splitScreenMode: true,
       builder: (context, child) {
-        return GetMaterialApp(
-          themeMode: ThemeMode.system,
-          theme: ThemeData(
-            primarySwatch: Colors.blue,
-            // Add text scaling control
-            textTheme: Theme.of(context).textTheme.apply(
-                  fontSizeFactor: 1.0, // Prevent system font scaling
+        return Obx(() => GetMaterialApp(
+              themeMode: ThemeMode.light,
+              theme: ThemeData(
+                useMaterial3: true,
+                primarySwatch: Colors.blue,
+                brightness: Brightness.light,
+                colorScheme: ColorScheme.fromSeed(
+                  seedColor: Colors.indigo,
+                  brightness: Brightness.light,
                 ),
-          ),
-          debugShowCheckedModeBanner: false,
-          defaultTransition: Transition.leftToRightWithFade,
-          transitionDuration: const Duration(milliseconds: 500),
-          builder: (context, widget) {
-            return MediaQuery(
-              // Override system text scaling
-              data: MediaQuery.of(context).copyWith(
-                textScaler: TextScaler.linear(
-                  MediaQuery.of(context).textScaleFactor.clamp(0.8, 1.2),
+                textTheme: Theme.of(context).textTheme.apply(
+                      fontSizeFactor: settingsService.fontSizeScale,
+                    ),
+                appBarTheme: const AppBarTheme(
+                  backgroundColor: Colors.indigo,
+                  foregroundColor: Colors.white,
+                  elevation: 0,
                 ),
               ),
-              child: widget!,
-            );
-          },
-          home: const SplashScreen(),
-        );
+              debugShowCheckedModeBanner: false,
+              defaultTransition: Transition.leftToRightWithFade,
+              transitionDuration: Duration(
+                milliseconds: settingsService.animationsEnabled ? 500 : 200,
+              ),
+              builder: (context, widget) {
+                return MediaQuery(
+                  data: MediaQuery.of(context).copyWith(
+                    textScaler: TextScaler.linear(
+                      (MediaQuery.of(context).textScaleFactor *
+                              settingsService.fontSizeScale)
+                          .clamp(0.8, 1.5),
+                    ),
+                  ),
+                  child: widget!,
+                );
+              },
+              home: const SplashScreen(),
+            ));
       },
     );
   }
