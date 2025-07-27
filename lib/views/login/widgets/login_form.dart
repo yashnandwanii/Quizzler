@@ -5,8 +5,6 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:quizzler/repository/authentication_repository/authentication_repository.dart';
 import 'package:quizzler/views/home/main_tab_view.dart';
-import 'package:quizzler/views/screens/forget_password/mail/forgot_password_mail_screen.dart';
-import 'package:quizzler/views/screens/forget_password/options/btn_widget.dart';
 import 'package:quizzler/views/signup/widgets/password_field.dart';
 import 'package:quizzler/views/widgets/rount_text_field.dart';
 
@@ -31,7 +29,6 @@ class _LoginFormState extends State<LoginForm> {
   Widget build(BuildContext context) {
     return Form(
       key: formKey,
-      autovalidateMode: AutovalidateMode.onUserInteraction,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -61,76 +58,81 @@ class _LoginFormState extends State<LoginForm> {
             isObscure: isPasswordHidden,
             icon: Icons.lock_outline,
           ),
-          Align(
-            alignment: Alignment.centerRight,
-            child: TextButton(
-              onPressed: () {
-                showModalBottomSheet(
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20)),
-                  context: context,
-                  builder: (context) {
-                    var children = [
-                      const Text(
-                        'Make Selection!',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(
-                        height: 20,
-                      ),
-                      const Text(
-                        'Select one of the options given below to reset your password.',
-                        style: TextStyle(
-                          fontSize: 16,
-                        ),
-                      ),
-                      const SizedBox(
-                        height: 20,
-                      ),
-                      ForgetPasswordbtnWidget(
-                        icon: Icons.email_outlined,
-                        title: 'Email',
-                        subtitle: 'Reset password via email',
-                        onClick: () {
-                          Navigator.pop(context);
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) =>
-                                  const ForgotPasswordMailScreen(),
-                            ),
-                          );
-                        },
-                      ),
-                      const SizedBox(
-                        height: 20,
-                      ),
-                      ForgetPasswordbtnWidget(
-                        icon: Icons.phone_outlined,
-                        title: 'Phone',
-                        subtitle: 'Reset password via phone',
-                        onClick: () {},
-                      ),
-                    ];
-                    return Container(
-                      padding: const EdgeInsets.all(30.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: children,
-                      ),
-                    );
-                  },
-                );
-              },
-              child: const Text(
-                'Forgot Password?',
-                style: TextStyle(color: Colors.blue),
-              ),
-            ),
+          SizedBox(
+            height: 10.h,
           ),
+          // Align(
+          //   alignment: Alignment.centerRight,
+          //   child: TextButton(
+          //     onPressed: () {
+          //       showModalBottomSheet(
+          //         shape: RoundedRectangleBorder(
+          //             borderRadius: BorderRadius.circular(20)),
+          //         context: context,
+          //         builder: (context) {
+          //           var children = [
+          //             const Text(
+          //               'Make Selection!',
+          //               style: TextStyle(
+          //                 fontSize: 20,
+          //                 fontWeight: FontWeight.bold,
+          //               ),
+          //             ),
+          //             const SizedBox(
+          //               height: 20,
+          //             ),
+          //             const Text(
+          //               'Select one of the options given below to reset your password.',
+          //               style: TextStyle(
+          //                 fontSize: 16,
+          //               ),
+          //             ),
+          //             const SizedBox(
+          //               height: 20,
+          //             ),
+          //             ForgetPasswordbtnWidget(
+          //               icon: Icons.email_outlined,
+          //               title: 'Email',
+          //               subtitle: 'Reset password via email',
+          //               onClick: () {
+          //                 Navigator.pop(context);
+          //                 Navigator.push(
+          //                   context,
+          //                   MaterialPageRoute(
+          //                     builder: (context) =>
+          //                         const ForgotPasswordMailScreen(),
+          //                   ),
+          //                 );
+          //               },
+          //             ),
+          //             const SizedBox(
+          //               height: 20,
+          //             ),
+          //             ForgetPasswordbtnWidget(
+          //               icon: Icons.phone_outlined,
+          //               title: 'Phone',
+          //               subtitle: 'Reset password via phone',
+          //               onClick: () {},
+          //             ),
+          //           ];
+          //           return Container(
+          //             padding: const EdgeInsets.all(30.0),
+          //             child: Column(
+          //               crossAxisAlignment: CrossAxisAlignment.start,
+          //               children: children,
+          //             ),
+          //           );
+          //         },
+          //       );
+          //     },
+          //     child: const Text(
+          //       'Forgot Password?',
+          //       style: TextStyle(color: Colors.blue),
+          //     ),
+          //   ),
+          // ),
+          // Obx(
+
           Obx(
             () => SizedBox(
               width: double.infinity,

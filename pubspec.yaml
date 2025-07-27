@@ -44,6 +44,8 @@ flutter:
 
   assets:
     - assets/icons/
+    - assets/image1.png
+    - assets/google_logo.png
     - .env
     - assets/animation.json
 
@@ -53,3 +55,4 @@ flutter:
         - asset: assets/Poppins/Poppins-Regular.ttf
         - asset: assets/Poppins/Poppins-Bold.ttf
           weight: 700
+

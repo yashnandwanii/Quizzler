@@ -1,69 +1,65 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
 class PasswordField extends StatelessWidget {
+  final TextEditingController controller;
+  final String hintText;
+  final String labelText;
+  final RxBool isObscure;
+  final IconData icon;
+
   const PasswordField({
     super.key,
     required this.controller,
     required this.hintText,
     required this.labelText,
     required this.isObscure,
-    this.icon,
+    required this.icon,
   });
-
-  final TextEditingController controller;
-  final String hintText;
-  final String labelText;
-  final IconData? icon;
-  final RxBool isObscure;
 
   @override
   Widget build(BuildContext context) {
     return Obx(
       () => TextFormField(
-        validator: (value) => value!.isEmpty
-            ? 'Please enter a password'
-            : value.length < 8
-                ? 'Password must be at least 6 characters'
-                : null,
-        obscureText: isObscure.value,
         controller: controller,
+        obscureText: isObscure.value,
+        autovalidateMode: AutovalidateMode.onUserInteraction,
+        validator: (value) {
+          if (value == null || value.isEmpty) {
+            return 'Please enter a password';
+          }
+          if (value.length < 8) {
+            return 'Password must be at least 8 characters long';
+          }
+          return null;
+        },
         decoration: InputDecoration(
+          labelText: labelText,
+          hintText: hintText,
+          prefixIcon: Icon(icon),
           suffixIcon: IconButton(
             icon: Icon(
-              isObscure.value ? Icons.visibility : Icons.visibility_off,
-              color: Colors.blue,
+              isObscure.value ? Icons.visibility_off : Icons.visibility,
             ),
             onPressed: () {
               isObscure.value = !isObscure.value;
             },
           ),
-          prefixIcon: icon != null
-              ? Icon(
-                  icon,
-                  color: Colors.blue,
-                )
-              : null,
-          labelText: labelText,
-          hintText: hintText,
-          filled: true,
-          fillColor: Colors.white,
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(
-              color: Colors.green,
-              width: 2.0,
-            ),
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(
-              color: Colors.grey,
-              width: 1.0,
-            ),
-          ),
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(10.r),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10.r),
+            borderSide: const BorderSide(color: Colors.blue, width: 2),
+          ),
+          errorBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10.r),
+            borderSide: const BorderSide(color: Colors.red, width: 1),
+          ),
+          focusedErrorBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10.r),
+            borderSide: const BorderSide(color: Colors.red, width: 2),
           ),
         ),
       ),
