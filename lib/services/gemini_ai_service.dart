@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
@@ -11,6 +12,9 @@ class GeminiAIService extends GetxController {
   final RxBool isLoading = false.obs;
   final RxString error = ''.obs;
 
+  // Add cancellation support
+  Completer<List<QuizModel>>? _currentRequest;
+
   @override
   void onInit() {
     super.onInit();
@@ -22,6 +26,16 @@ class GeminiAIService extends GetxController {
     _model = GenerativeModel(model: 'gemini-1.5-flash', apiKey: apiKey);
   }
 
+  /// Cancel current quiz generation request
+  void cancelCurrentRequest() {
+    if (_currentRequest != null && !_currentRequest!.isCompleted) {
+      _currentRequest!.completeError('Request cancelled by user');
+      _currentRequest = null;
+      isLoading.value = false;
+      debugPrint('AI quiz generation cancelled');
+    }
+  }
+
   /// Generate custom quiz questions using Gemini AI
   Future<List<QuizModel>> generateCustomQuiz({
     required String topic,
@@ -31,6 +45,12 @@ class GeminiAIService extends GetxController {
     String? language,
   }) async {
     try {
+      // Cancel any existing request
+      cancelCurrentRequest();
+
+      // Create new request completer
+      _currentRequest = Completer<List<QuizModel>>();
+
       isLoading.value = true;
       error.value = '';
 
@@ -44,15 +64,35 @@ class GeminiAIService extends GetxController {
 
       final response = await _model.generateContent([Content.text(prompt)]);
 
+      // Check if request was cancelled
+      if (_currentRequest == null || _currentRequest!.isCompleted) {
+        throw Exception('Request was cancelled');
+      }
+
       if (response.text == null || response.text!.isEmpty) {
         throw Exception('No response received from AI');
       }
 
-      return _parseAIResponse(response.text!);
+      final quizList = _parseAIResponse(response.text!);
+
+      // Complete the request if not cancelled
+      if (_currentRequest != null && !_currentRequest!.isCompleted) {
+        _currentRequest!.complete(quizList);
+        _currentRequest = null;
+      }
+
+      return quizList;
     } catch (e) {
-      error.value = 'Failed to generate quiz: $e';
-      debugPrint('Gemini AI Error: $e');
-      return [];
+      isLoading.value = false;
+      error.value = e.toString();
+
+      // Complete request with error if not cancelled
+      if (_currentRequest != null && !_currentRequest!.isCompleted) {
+        _currentRequest!.completeError(e);
+        _currentRequest = null;
+      }
+
+      rethrow;
     } finally {
       isLoading.value = false;
     }

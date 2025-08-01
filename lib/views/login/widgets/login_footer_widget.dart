@@ -40,11 +40,7 @@ class LoginFooterWidget extends StatelessWidget {
                 box.write('isLoggedIn', true);
 
                 Get.offAll(() => const MainTabView());
-                Get.snackbar(
-                  'Success',
-                  'Welcome, ${userCredential.user?.displayName}!',
-                  snackPosition: SnackPosition.BOTTOM,
-                );
+                // Note: Snackbar will be shown by AuthenticationRepository
               }
             },
             icon: Image(

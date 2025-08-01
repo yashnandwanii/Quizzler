@@ -32,13 +32,7 @@ class _CustomQuizGeneratorScreenState extends State<CustomQuizGeneratorScreen>
 
   final List<String> difficulties = ['Easy', 'Medium', 'Hard'];
   final List<int> questionCounts = [5, 10, 15, 20];
-  final List<String> languages = [
-    'English',
-    'Spanish',
-    'French',
-    'German',
-    'Italian'
-  ];
+  final List<String> languages = ['English', 'Hindi'];
 
   @override
   void initState() {
@@ -73,6 +67,10 @@ class _CustomQuizGeneratorScreenState extends State<CustomQuizGeneratorScreen>
 
   @override
   void dispose() {
+    // Cancel any ongoing AI quiz generation when user navigates away
+    if (_isGenerating) {
+      _geminiService.cancelCurrentRequest();
+    }
     _animationController.dispose();
     _topicController.dispose();
     _requirementsController.dispose();
@@ -165,147 +163,167 @@ class _CustomQuizGeneratorScreenState extends State<CustomQuizGeneratorScreen>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: offwhite,
-      appBar: AppBar(
+    return PopScope(
+      canPop: !_isGenerating,
+      onPopInvoked: (didPop) {
+        if (_isGenerating) {
+          // Cancel the AI generation and allow navigation
+          _geminiService.cancelCurrentRequest();
+          setState(() {
+            _isGenerating = false;
+          });
+        }
+      },
+      child: Scaffold(
         backgroundColor: offwhite,
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(
-            Icons.arrow_back_ios,
-            color: darkTextColor,
-            size: 20.sp,
+        appBar: AppBar(
+          backgroundColor: offwhite,
+          elevation: 0,
+          leading: IconButton(
+            icon: Icon(
+              Icons.arrow_back_ios,
+              color: darkTextColor,
+              size: 20.sp,
+            ),
+            onPressed: () {
+              if (_isGenerating) {
+                _geminiService.cancelCurrentRequest();
+                setState(() {
+                  _isGenerating = false;
+                });
+              }
+              Get.back();
+            },
           ),
-          onPressed: () => Get.back(),
-        ),
-        title: Text(
-          'Custom Quiz Generator',
-          style: GoogleFonts.inter(
-            fontSize: 20.sp,
-            fontWeight: FontWeight.bold,
-            color: darkTextColor,
+          title: Text(
+            'Custom Quiz Generator',
+            style: GoogleFonts.inter(
+              fontSize: 20.sp,
+              fontWeight: FontWeight.bold,
+              color: darkTextColor,
+            ),
           ),
+          centerTitle: true,
         ),
-        centerTitle: true,
-      ),
-      body: FadeTransition(
-        opacity: _fadeAnimation,
-        child: SlideTransition(
-          position: _slideAnimation,
-          child: SingleChildScrollView(
-            padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Header Card
-                Container(
-                  width: double.infinity,
-                  padding: EdgeInsets.all(20.w),
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [
-                        Color(0xFF6C63FF),
-                        Color(0xFF8B5CF6),
+        body: FadeTransition(
+          opacity: _fadeAnimation,
+          child: SlideTransition(
+            position: _slideAnimation,
+            child: SingleChildScrollView(
+              padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Header Card
+                  Container(
+                    width: double.infinity,
+                    padding: EdgeInsets.all(20.w),
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [
+                          Color(0xFF6C63FF),
+                          Color(0xFF8B5CF6),
+                        ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(16.r),
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(0xFF6C63FF).withValues(alpha: 0.3),
+                          blurRadius: 10,
+                          offset: const Offset(0, 5),
+                        ),
                       ],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
                     ),
-                    borderRadius: BorderRadius.circular(16.r),
-                    boxShadow: [
-                      BoxShadow(
-                        color: const Color(0xFF6C63FF).withValues(alpha: 0.3),
-                        blurRadius: 10,
-                        offset: const Offset(0, 5),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Icon(
-                        Icons.auto_awesome,
-                        color: Colors.white,
-                        size: 32.sp,
-                      ),
-                      SizedBox(height: 12.h),
-                      Text(
-                        'AI-Powered Quiz',
-                        style: GoogleFonts.inter(
-                          fontSize: 22.sp,
-                          fontWeight: FontWeight.bold,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Icon(
+                          Icons.auto_awesome,
                           color: Colors.white,
+                          size: 32.sp,
                         ),
-                      ),
-                      SizedBox(height: 4.h),
-                      Text(
-                        'Create personalized quizzes on any topic using advanced AI',
-                        style: GoogleFonts.inter(
-                          fontSize: 14.sp,
-                          color: Colors.white.withValues(alpha: 0.9),
+                        SizedBox(height: 12.h),
+                        Text(
+                          'AI-Powered Quiz',
+                          style: GoogleFonts.inter(
+                            fontSize: 22.sp,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
                         ),
-                      ),
-                    ],
+                        SizedBox(height: 4.h),
+                        Text(
+                          'Create personalized quizzes on any topic using advanced AI',
+                          style: GoogleFonts.inter(
+                            fontSize: 14.sp,
+                            color: Colors.white.withValues(alpha: 0.9),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
 
-                SizedBox(height: 24.h),
+                  SizedBox(height: 24.h),
 
-                // Topic Input
-                _buildSectionTitle('Quiz Topic'),
-                SizedBox(height: 8.h),
-                _buildTextField(
-                  controller: _topicController,
-                  hintText:
-                      'e.g., JavaScript Programming, World History, Biology...',
-                  icon: Icons.topic,
-                ),
+                  // Topic Input
+                  _buildSectionTitle('Quiz Topic'),
+                  SizedBox(height: 8.h),
+                  _buildTextField(
+                    controller: _topicController,
+                    hintText:
+                        'e.g., JavaScript Programming, World History, Biology...',
+                    icon: Icons.topic,
+                  ),
 
-                SizedBox(height: 20.h),
+                  SizedBox(height: 20.h),
 
-                // Difficulty Selection
-                _buildSectionTitle('Difficulty Level'),
-                SizedBox(height: 8.h),
-                _buildDifficultySelector(),
+                  // Difficulty Selection
+                  _buildSectionTitle('Difficulty Level'),
+                  SizedBox(height: 8.h),
+                  _buildDifficultySelector(),
 
-                SizedBox(height: 20.h),
+                  SizedBox(height: 20.h),
 
-                // Question Count
-                _buildSectionTitle('Number of Questions'),
-                SizedBox(height: 8.h),
-                _buildQuestionCountSelector(),
+                  // Question Count
+                  _buildSectionTitle('Number of Questions'),
+                  SizedBox(height: 8.h),
+                  _buildQuestionCountSelector(),
 
-                SizedBox(height: 20.h),
+                  SizedBox(height: 20.h),
 
-                // Language Selection
-                _buildSectionTitle('Language'),
-                SizedBox(height: 8.h),
-                _buildLanguageSelector(),
+                  // Language Selection
+                  _buildSectionTitle('Language'),
+                  SizedBox(height: 8.h),
+                  _buildLanguageSelector(),
 
-                SizedBox(height: 20.h),
+                  SizedBox(height: 20.h),
 
-                // Additional Requirements
-                _buildSectionTitle('Additional Requirements (Optional)'),
-                SizedBox(height: 8.h),
-                _buildTextField(
-                  controller: _requirementsController,
-                  hintText:
-                      'e.g., Focus on recent developments, include practical examples...',
-                  icon: Icons.note_add,
-                  maxLines: 3,
-                ),
+                  // Additional Requirements
+                  _buildSectionTitle('Additional Requirements (Optional)'),
+                  SizedBox(height: 8.h),
+                  _buildTextField(
+                    controller: _requirementsController,
+                    hintText:
+                        'e.g., Focus on recent developments, include practical examples...',
+                    icon: Icons.note_add,
+                    maxLines: 3,
+                  ),
 
-                SizedBox(height: 32.h),
+                  SizedBox(height: 32.h),
 
-                // Generate Button
-                _buildGenerateButton(),
+                  // Generate Button
+                  _buildGenerateButton(),
 
-                SizedBox(height: 20.h),
-              ],
+                  SizedBox(height: 20.h),
+                ],
+              ),
             ),
           ),
         ),
-      ),
-    );
+      ), // Close PopScope child (Scaffold)
+    ); // Close PopScope
   }
 
   Widget _buildSectionTitle(String title) {

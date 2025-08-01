@@ -153,19 +153,53 @@ class _HomeScreenState extends State<HomeScreen> {
     final userRepo = Get.find<UserRepository>();
     final userId = authRepo.firebaseUser.value?.uid;
 
+    if (userId == null) {
+      return const Scaffold(
+        body: Center(child: Text("Please log in to continue.")),
+      );
+    }
+
     return Scaffold(
       backgroundColor: const Color(0xFFF4F5F9),
       body: SafeArea(
         child: FutureBuilder<UserModel?>(
-            future: userRepo.getUserData(userId!),
+            future: userRepo.getUserData(userId),
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const Center(child: CircularProgressIndicator());
               }
-              if (snapshot.hasError || !snapshot.hasData) {
-                return const Center(child: Text("Could not load user data."));
+
+              // Handle error or missing data by creating a default user
+              UserModel user;
+              if (snapshot.hasError ||
+                  !snapshot.hasData ||
+                  snapshot.data == null) {
+                debugPrint(
+                    'User data not found or error occurred. Creating default user.');
+                // Create a default user with Firebase user info
+                final firebaseUser = authRepo.firebaseUser.value;
+                user = UserModel(
+                  id: userId,
+                  fullName: firebaseUser?.displayName ?? 'User',
+                  email: firebaseUser?.email ?? 'user@example.com',
+                  password: '', // Not needed for display
+                  photoUrl: firebaseUser?.photoURL ?? '',
+                  coins: 0,
+                  rank: 0,
+                );
+
+                // Try to create the user document in Firestore in the background
+                Future.microtask(() async {
+                  try {
+                    await userRepo.createUser(user);
+                    debugPrint('Created missing user document for $userId');
+                  } catch (e) {
+                    debugPrint('Failed to create user document: $e');
+                  }
+                });
+              } else {
+                user = snapshot.data!;
               }
-              final user = snapshot.data!;
               return SingleChildScrollView(
                 child: Padding(
                   padding: EdgeInsets.symmetric(horizontal: 10.w),

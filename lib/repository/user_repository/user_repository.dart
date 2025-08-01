@@ -10,8 +10,11 @@ class UserRepository extends GetxController {
 
   Future<void> createUser(UserModel user) async {
     try {
+      debugPrint('Creating user document for ID: ${user.id}');
       await _db.collection("users").doc(user.id).set(user.toJson());
+      debugPrint('User document created successfully');
     } catch (e) {
+      debugPrint('Error creating user document: $e');
       Get.snackbar(
         "Error",
         "Something went wrong. Try again",
@@ -25,12 +28,19 @@ class UserRepository extends GetxController {
 
   Future<UserModel?> getUserData(String userId) async {
     try {
+      debugPrint('Fetching user data for ID: $userId');
       final doc = await _db.collection('users').doc(userId).get();
       if (doc.exists) {
-        return UserModel.fromJson(doc.data()!);
+        debugPrint('User document found');
+        final data = doc.data()!;
+        debugPrint('User data: $data');
+        return UserModel.fromJson(data);
+      } else {
+        debugPrint('User document does not exist for ID: $userId');
       }
     } catch (e) {
-      Get.snackbar('Error', 'Failed to fetch user data.');
+      debugPrint('Error fetching user data: $e');
+      Get.snackbar('Error', 'Failed to fetch user data: $e');
     }
     return null;
   }

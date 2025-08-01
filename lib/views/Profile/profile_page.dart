@@ -68,7 +68,6 @@ class _ProfilePageState extends State<ProfilePage> {
     final authRepo = Get.find<AuthenticationRepository>();
     final userRepo = Get.find<UserRepository>();
     final userId = authRepo.firebaseUser.value?.uid;
-    UserModel? user0;
 
     if (userId == null) {
       return const Scaffold(
@@ -84,11 +83,37 @@ class _ProfilePageState extends State<ProfilePage> {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
-          if (snapshot.hasError || !snapshot.hasData || snapshot.data == null) {
-            return const Center(child: Text('Failed to load user data.'));
-          }
 
-          final user = user0 ?? snapshot.data!;
+          // Handle error or missing data by creating a default user
+          UserModel user;
+          if (snapshot.hasError || !snapshot.hasData || snapshot.data == null) {
+            debugPrint(
+                'Profile: User data not found or error occurred. Creating default user.');
+            // Create a default user with Firebase user info
+            final firebaseUser = authRepo.firebaseUser.value;
+            user = UserModel(
+              id: userId,
+              fullName: firebaseUser?.displayName ?? 'User',
+              email: firebaseUser?.email ?? 'user@example.com',
+              password: '', // Not needed for display
+              photoUrl: firebaseUser?.photoURL ?? '',
+              coins: 0,
+              rank: 0,
+            );
+
+            // Try to create the user document in Firestore in the background
+            Future.microtask(() async {
+              try {
+                await userRepo.createUser(user);
+                debugPrint(
+                    'Profile: Created missing user document for $userId');
+              } catch (e) {
+                debugPrint('Profile: Failed to create user document: $e');
+              }
+            });
+          } else {
+            user = snapshot.data!;
+          }
 
           return SingleChildScrollView(
             padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 40.h),

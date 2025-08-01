@@ -53,7 +53,7 @@ class _LoginFormState extends State<LoginForm> {
           ),
           PasswordField(
             controller: _passwordController,
-            hintText: 'Enter you password',
+            hintText: 'Enter your password',
             labelText: 'Password',
             isObscure: isPasswordHidden,
             icon: Icons.lock_outline,
@@ -173,22 +173,14 @@ class _LoginFormState extends State<LoginForm> {
                         box.erase(); // Clear previous data
                         box.write('userId', user.id);
                         box.write('CurrentUser', user);
-
                         box.write('isLoggedIn', true);
 
-                        // Show success message and navigate to Home Screen
+                        // Navigate to Home Screen without showing snackbar
+                        // (snackbar might be shown by auth repository for Google sign-in)
                         await Get.offAll(
                           () => const MainTabView(),
                           transition: Transition.rightToLeft,
                           duration: const Duration(milliseconds: 500),
-                        );
-                        Get.showSnackbar(
-                          GetSnackBar(
-                            title: 'Login Successful',
-                            message: 'Welcome back!',
-                            backgroundColor: Colors.green.shade300,
-                            duration: const Duration(seconds: 2),
-                          ),
                         );
                       }
                     }

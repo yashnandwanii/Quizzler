@@ -37,6 +37,7 @@ class PasswordField extends StatelessWidget {
         decoration: InputDecoration(
           labelText: labelText,
           hintText: hintText,
+          fillColor: Colors.white,
           prefixIcon: Icon(icon),
           suffixIcon: IconButton(
             icon: Icon(
