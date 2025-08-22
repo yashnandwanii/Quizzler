@@ -235,6 +235,9 @@ class _EnhancedQuizScreenState extends State<EnhancedQuizScreen> {
     final totalScore = baseScore + totalBonusPoints;
     final coinsEarned = correctAnswers * 10 + (totalBonusPoints ~/ 10);
 
+    // Detect if this is a revision quiz
+    final isRevisionQuiz = widget.category.apiCategory == 'AI_Revision';
+
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(
@@ -250,6 +253,7 @@ class _EnhancedQuizScreenState extends State<EnhancedQuizScreen> {
           coinsEarned: coinsEarned,
           userAnswers: userAnswers,
           timeSpent: totalTimeSpentInSeconds, // Use actual time spent
+          isRevisionQuiz: isRevisionQuiz, // Pass the revision quiz flag
         ),
       ),
     );
@@ -458,41 +462,43 @@ class _EnhancedQuizScreenState extends State<EnhancedQuizScreen> {
           onPressed: () => _showExitDialog(),
           icon: const Icon(Icons.close, color: Colors.white, size: 30),
         ),
-        Row(
-          children: [
-            // Timer display
-            Container(
-              padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
-              decoration: BoxDecoration(
-                color: seconds <= 10
-                    ? Colors.red.withValues(alpha: 0.8)
-                    : Colors.white.withValues(alpha: 0.2),
-                borderRadius: BorderRadius.circular(20.r),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    Icons.timer,
-                    color: seconds <= 10 ? Colors.white : Colors.white70,
-                    size: 16,
-                  ),
-                  SizedBox(width: 4.w),
-                  Text(
-                    '${seconds}s',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 14.sp,
-                      fontWeight: FontWeight.bold,
+        Expanded(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              // Timer display
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
+                decoration: BoxDecoration(
+                  color: seconds <= 10
+                      ? Colors.red.withValues(alpha: 0.8)
+                      : Colors.white.withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(20.r),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.timer,
+                      color: seconds <= 10 ? Colors.white : Colors.white70,
+                      size: 16,
                     ),
-                  ),
-                ],
+                    SizedBox(width: 4.w),
+                    Text(
+                      '${seconds}s',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-            SizedBox(width: 8.w),
-            // Category display
-            Flexible(
-              child: Container(
+              SizedBox(width: 8.w),
+              // Category display
+              Container(
+                constraints: BoxConstraints(maxWidth: 150.w),
                 padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
                 decoration: BoxDecoration(
                   color: Colors.white.withValues(alpha: 0.2),
@@ -509,8 +515,8 @@ class _EnhancedQuizScreenState extends State<EnhancedQuizScreen> {
                   maxLines: 1,
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
         _buildBonusWidget(),
       ],

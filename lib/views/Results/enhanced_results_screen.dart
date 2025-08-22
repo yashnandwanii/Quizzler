@@ -26,6 +26,7 @@ class EnhancedResultsScreen extends StatefulWidget {
   final int timeSpent;
   final List<Map<String, dynamic>> userAnswers;
   final String quizId;
+  final bool isRevisionQuiz; // Flag to identify revision quizzes
 
   const EnhancedResultsScreen({
     super.key,
@@ -40,10 +41,11 @@ class EnhancedResultsScreen extends StatefulWidget {
     required this.timeSpent,
     required this.userAnswers,
     required this.quizId,
+    this.isRevisionQuiz = false, // Default to false for regular quizzes
   });
 
   @override
-  _EnhancedResultsScreenState createState() => _EnhancedResultsScreenState();
+  State<EnhancedResultsScreen> createState() => _EnhancedResultsScreenState();
 }
 
 class _EnhancedResultsScreenState extends State<EnhancedResultsScreen> {
@@ -407,7 +409,7 @@ class _EnhancedResultsScreenState extends State<EnhancedResultsScreen> {
                 onPressed: () {
                   // Navigate back to category with same preferences
                   Get.offAll(
-                    () => MainTabView(),
+                    () => const MainTabView(),
                     transition: Transition.leftToRight,
                     duration: const Duration(milliseconds: 500),
                   );
@@ -443,6 +445,20 @@ class _EnhancedResultsScreenState extends State<EnhancedResultsScreen> {
   }
 
   String _getFeedback(double scorePercentage) {
+    // Special messages for revision quizzes
+    if (widget.isRevisionQuiz) {
+      if (scorePercentage == 100) {
+        return "🎯 Perfect! You've mastered your weak areas!";
+      } else if (scorePercentage >= 80) {
+        return "💪 Great improvement! Your revision is paying off!";
+      } else if (scorePercentage >= 60) {
+        return "📚 Good progress! Keep reviewing these concepts!";
+      } else {
+        return "🔄 Keep practicing! Revision makes perfect!";
+      }
+    }
+
+    // Regular quiz messages
     if (scorePercentage == 100) {
       return "🎉 Perfect Score! You're a ${widget.category.name} Master!";
     } else if (scorePercentage >= 80) {
@@ -454,12 +470,61 @@ class _EnhancedResultsScreenState extends State<EnhancedResultsScreen> {
     }
   }
 
+  Future<void> _saveQuizWrongAnswers() async {
+    try {
+      // Skip saving wrong answers for revision quizzes
+      if (widget.isRevisionQuiz) {
+        debugPrint('Skipping wrong answers save for revision quiz');
+        return;
+      }
+
+      final authRepo = Get.find<AuthenticationRepository>();
+      final userId = authRepo.firebaseUser.value?.uid;
+      if (userId == null) return;
+
+      // Filter out wrong answers from userAnswers
+      final wrongAnswers = widget.userAnswers.where((answer) {
+        return answer['isCorrect'] == false;
+      }).toList();
+
+      if (wrongAnswers.isEmpty) return;
+
+      // Use the "Wrong_attempts" collection directly
+      final wrongAttemptsCollection = FirebaseFirestore.instance
+          .collection('users')
+          .doc(userId)
+          .collection('Wrong_attempts');
+
+      // Store each wrong question as a document (for AI rephrasing)
+      for (var answer in wrongAnswers) {
+        await wrongAttemptsCollection.add({
+          'userId': userId,
+          'questionId': answer['questionId'] ??
+              'ai_generated_${DateTime.now().millisecondsSinceEpoch}',
+          'questionText': answer['question'] ?? answer['questionText'] ?? '',
+          'correctAnswer': answer['correctAnswer'],
+          'description': answer['description'] ?? '',
+          'options': answer['options'] ?? [],
+          'userAnswer': answer['userAnswer'],
+        });
+      }
+    } catch (e) {
+      debugPrint('Error saving wrong answers: $e');
+    }
+  }
+
   Future<void> _saveQuizResultAndUpdateStats() async {
     if (_isSaving) return;
 
     setState(() => _isSaving = true);
 
     try {
+      // Skip saving for revision quizzes
+      if (widget.isRevisionQuiz) {
+        debugPrint('Skipping save for revision quiz');
+        return;
+      }
+
       final authRepo = Get.find<AuthenticationRepository>();
       final userId = authRepo.firebaseUser.value?.uid;
       if (userId == null) return;
@@ -555,6 +620,9 @@ class _EnhancedResultsScreenState extends State<EnhancedResultsScreen> {
       if (completedChallenges.isNotEmpty) {
         _showChallengeNotifications(completedChallenges);
       }
+
+      // Save wrong answers for revision feature
+      await _saveQuizWrongAnswers();
     } catch (e) {
       debugPrint('Error saving quiz result: $e');
     } finally {

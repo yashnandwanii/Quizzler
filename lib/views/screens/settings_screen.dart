@@ -59,15 +59,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildSectionHeader('Game Settings'),
-            _buildGameSettingsSection(),
-            SizedBox(height: 24.h),
-            _buildSectionHeader('Audio & Feedback'),
-            _buildAudioSection(),
-            SizedBox(height: 24.h),
-            _buildSectionHeader('Preferences'),
-            _buildPreferencesSection(),
-            SizedBox(height: 24.h),
             _buildSectionHeader('Data & Privacy'),
             _buildDataSection(),
             SizedBox(height: 24.h),

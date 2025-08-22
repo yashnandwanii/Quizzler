@@ -114,13 +114,24 @@ class _QuizHistoryScreenState extends State<QuizHistoryScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            _buildHeader(),
-            _buildStatsCard(),
-            _buildFilterSection(),
+            _buildHeader(), // Fixed header
             Expanded(
-              child: _isLoading
-                  ? const Center(child: CircularProgressIndicator())
-                  : _buildHistoryList(),
+              child: SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                child: Column(
+                  children: [
+                    _buildStatsCard(),
+                    _buildStreakDetailsCard(),
+                    _buildFilterSection(),
+                    SizedBox(
+                      height: MediaQuery.of(context).size.height * 0.6,
+                      child: _isLoading
+                          ? const Center(child: CircularProgressIndicator())
+                          : _buildHistoryList(),
+                    ),
+                  ],
+                ),
+              ),
             ),
           ],
         ),
@@ -233,11 +244,12 @@ class _QuizHistoryScreenState extends State<QuizHistoryScreen> {
               ),
               SizedBox(width: 12.w),
               Expanded(
-                child: _buildStatItem(
-                  'Streak',
+                child: _buildEnhancedStreakItem(
+                  'Current Streak',
                   '${_userStats['streakCount'] ?? 0}',
+                  _getStreakMessage(_userStats['streakCount'] ?? 0),
                   Icons.local_fire_department,
-                  Colors.red,
+                  _getStreakColor(_userStats['streakCount'] ?? 0),
                 ),
               ),
             ],
@@ -273,6 +285,253 @@ class _QuizHistoryScreenState extends State<QuizHistoryScreen> {
             label,
             style: TextStyle(
               fontSize: 12.sp,
+              color: Colors.grey.shade600,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEnhancedStreakItem(
+      String label, String value, String message, IconData icon, Color color) {
+    return Container(
+      padding: EdgeInsets.all(12.w),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            color.withValues(alpha: 0.1),
+            color.withValues(alpha: 0.05),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(12.r),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
+      ),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon, color: color, size: 24.sp),
+              SizedBox(width: 4.w),
+              if (int.parse(value) > 0)
+                ...List.generate(
+                    (int.parse(value) / 5).ceil().clamp(0, 3),
+                    (index) =>
+                        Icon(Icons.star, color: Colors.amber, size: 12.sp)),
+            ],
+          ),
+          SizedBox(height: 8.h),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 20.sp,
+              fontWeight: FontWeight.bold,
+              color: color,
+            ),
+          ),
+          SizedBox(height: 4.h),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 11.sp,
+              fontWeight: FontWeight.w600,
+              color: color,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          SizedBox(height: 2.h),
+          Text(
+            message,
+            style: TextStyle(
+              fontSize: 9.sp,
+              color: Colors.grey.shade600,
+            ),
+            textAlign: TextAlign.center,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Color _getStreakColor(int streak) {
+    if (streak >= 30) return const Color(0xFF6C63FF); // Purple for legendary
+    if (streak >= 20) return const Color(0xFFFF6B6B); // Red for amazing
+    if (streak >= 10) return const Color(0xFF4ECDC4); // Teal for great
+    if (streak >= 5) return const Color(0xFFFFE66D); // Yellow for good
+    if (streak >= 1) return const Color(0xFF95E1D3); // Light green for started
+    return Colors.grey; // Grey for no streak
+  }
+
+  String _getStreakMessage(int streak) {
+    if (streak >= 30) return 'Legendary! 🏆';
+    if (streak >= 20) return 'Amazing! 🔥';
+    if (streak >= 15) return 'Incredible! ⭐';
+    if (streak >= 10) return 'Great job! 💪';
+    if (streak >= 7) return 'Keep going! 🚀';
+    if (streak >= 5) return 'Good streak! 👍';
+    if (streak >= 3) return 'Building up! 📈';
+    if (streak >= 1) return 'Started! 🌱';
+    return 'Start today! 💡';
+  }
+
+  Widget _buildStreakDetailsCard() {
+    if (_userStats.isEmpty) return const SizedBox();
+
+    final currentStreak = _userStats['streakCount'] ?? 0;
+    final longestStreak = _userStats['longestStreak'] ?? 0;
+    final streaksThisWeek = _userStats['streaksThisWeek'] ?? 0;
+    final streaksThisMonth = _userStats['streaksThisMonth'] ?? 0;
+
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: 20.w, vertical: 8.h),
+      padding: EdgeInsets.all(16.w),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            _getStreakColor(currentStreak).withValues(alpha: 0.1),
+            _getStreakColor(currentStreak).withValues(alpha: 0.05),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(16.r),
+        border: Border.all(
+          color: _getStreakColor(currentStreak).withValues(alpha: 0.3),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                Icons.local_fire_department,
+                color: _getStreakColor(currentStreak),
+                size: 24.sp,
+              ),
+              SizedBox(width: 8.w),
+              Text(
+                'Streak Analytics',
+                style: GoogleFonts.inter(
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.bold,
+                  color: _getStreakColor(currentStreak),
+                ),
+              ),
+              const Spacer(),
+              if (currentStreak > 0)
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+                  decoration: BoxDecoration(
+                    color: _getStreakColor(currentStreak),
+                    borderRadius: BorderRadius.circular(12.r),
+                  ),
+                  child: Text(
+                    'Active',
+                    style: GoogleFonts.inter(
+                      fontSize: 10.sp,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+          SizedBox(height: 12.h),
+          Row(
+            children: [
+              Expanded(
+                child: _buildMiniStatItem(
+                  'Longest',
+                  '$longestStreak days',
+                  Icons.emoji_events,
+                  Colors.amber,
+                ),
+              ),
+              SizedBox(width: 8.w),
+              Expanded(
+                child: _buildMiniStatItem(
+                  'This Week',
+                  '$streaksThisWeek days',
+                  Icons.calendar_view_week,
+                  Colors.blue,
+                ),
+              ),
+              SizedBox(width: 8.w),
+              Expanded(
+                child: _buildMiniStatItem(
+                  'This Month',
+                  '$streaksThisMonth days',
+                  Icons.calendar_month,
+                  Colors.green,
+                ),
+              ),
+            ],
+          ),
+          if (currentStreak == 0) ...[
+            SizedBox(height: 12.h),
+            Container(
+              padding: EdgeInsets.all(12.w),
+              decoration: BoxDecoration(
+                color: Colors.blue.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(8.r),
+                border: Border.all(color: Colors.blue.withValues(alpha: 0.3)),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.lightbulb_outline,
+                      color: Colors.blue, size: 20.sp),
+                  SizedBox(width: 8.w),
+                  Expanded(
+                    child: Text(
+                      'Start a new streak by taking a quiz today!',
+                      style: GoogleFonts.inter(
+                        fontSize: 12.sp,
+                        color: Colors.blue.shade700,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMiniStatItem(
+      String label, String value, IconData icon, Color color) {
+    return Container(
+      padding: EdgeInsets.all(8.w),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(8.r),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
+      ),
+      child: Column(
+        children: [
+          Icon(icon, color: color, size: 16.sp),
+          SizedBox(height: 4.h),
+          Text(
+            value,
+            style: GoogleFonts.inter(
+              fontSize: 12.sp,
+              fontWeight: FontWeight.bold,
+              color: color,
+            ),
+          ),
+          Text(
+            label,
+            style: GoogleFonts.inter(
+              fontSize: 9.sp,
               color: Colors.grey.shade600,
             ),
             textAlign: TextAlign.center,

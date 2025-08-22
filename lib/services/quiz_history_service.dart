@@ -36,6 +36,7 @@ class QuizHistoryService {
         'timestamp': FieldValue.serverTimestamp(), // Ensure timestamp is added
         'completedAt':
             FieldValue.serverTimestamp(), // Add completedAt for consistency
+        'isRevisionQuiz': false, // Mark as regular quiz for streak calculation
       };
       await FirestoreService.addQuizHistory(userId, quizId, historyData);
     } catch (e) {
@@ -216,6 +217,9 @@ class QuizHistoryService {
       // Calculate current streak
       int streakCount = await _calculateCurrentStreak(userId);
 
+      // Calculate additional streak stats
+      Map<String, dynamic> streakStats = await _getStreakStatistics(userId);
+
       return {
         'totalQuizzes': totalQuizzes,
         'totalScore': totalScore,
@@ -225,6 +229,9 @@ class QuizHistoryService {
         'bestScore': bestScore,
         'categoriesPlayed': categoriesPlayed.length,
         'streakCount': streakCount,
+        'longestStreak': streakStats['longestStreak'] ?? 0,
+        'streaksThisWeek': streakStats['streaksThisWeek'] ?? 0,
+        'streaksThisMonth': streakStats['streaksThisMonth'] ?? 0,
       };
     } catch (e) {
       debugPrint('Error fetching quiz stats: $e');
@@ -232,7 +239,7 @@ class QuizHistoryService {
     }
   }
 
-  // Calculate current streak
+  // Calculate current streak with enhanced logic
   static Future<int> _calculateCurrentStreak(String userId) async {
     try {
       final snapshot = await _firestore
@@ -240,26 +247,229 @@ class QuizHistoryService {
           .doc(userId)
           .collection('quiz_history')
           .orderBy('completedAt', descending: true)
-          .limit(30)
+          .limit(100) // Get more history for better streak calculation
           .get();
 
-      int streak = 0;
+      if (snapshot.docs.isEmpty) return 0;
+
+      // Group quizzes by day
+      Map<String, List<Map<String, dynamic>>> quizzesByDay = {};
+
       for (var doc in snapshot.docs) {
         final data = doc.data();
-        final accuracy = data['accuracy'] ?? 0;
+        final completedAt = data['completedAt'];
 
-        // Consider a quiz as "successful" if accuracy is 60% or higher
-        if (accuracy >= 60) {
-          streak++;
+        if (completedAt == null) continue;
+
+        DateTime date;
+        if (completedAt is Timestamp) {
+          date = completedAt.toDate();
+        } else if (completedAt is DateTime) {
+          date = completedAt;
         } else {
-          break; // Streak broken
+          continue;
+        }
+
+        // Format date as YYYY-MM-DD for grouping
+        String dayKey =
+            '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+
+        if (!quizzesByDay.containsKey(dayKey)) {
+          quizzesByDay[dayKey] = [];
+        }
+
+        quizzesByDay[dayKey]!.add(data);
+      }
+
+      // Sort days in descending order (most recent first)
+      List<String> sortedDays = quizzesByDay.keys.toList()
+        ..sort((a, b) => b.compareTo(a));
+
+      int currentStreak = 0;
+      DateTime today = DateTime.now();
+
+      for (String dayKey in sortedDays) {
+        DateTime dayDate = DateTime.parse(dayKey);
+        List<Map<String, dynamic>> dayQuizzes = quizzesByDay[dayKey]!;
+
+        // Check if this day should count towards streak
+        bool daySuccess = _isDaySuccessful(dayQuizzes);
+
+        if (daySuccess) {
+          // Check if this is consecutive day
+          if (currentStreak == 0) {
+            // First day of streak - must be today or yesterday
+            int daysDifference = today.difference(dayDate).inDays;
+            if (daysDifference <= 1) {
+              currentStreak = 1;
+            } else {
+              break; // Gap in streak
+            }
+          } else {
+            // Check if consecutive day
+            DateTime previousDay =
+                DateTime.parse(sortedDays[sortedDays.indexOf(dayKey) - 1]);
+            if (previousDay.difference(dayDate).inDays == 1) {
+              currentStreak++;
+            } else {
+              break; // Gap in consecutive days
+            }
+          }
+        } else {
+          break; // Day was not successful, streak broken
         }
       }
 
-      return streak;
+      return currentStreak;
     } catch (e) {
       debugPrint('Error calculating streak: $e');
       return 0;
+    }
+  }
+
+  // Determine if a day is considered successful for streak calculation
+  static bool _isDaySuccessful(List<Map<String, dynamic>> dayQuizzes) {
+    if (dayQuizzes.isEmpty) return false;
+
+    // Calculate day's overall performance
+    int totalCorrect = 0;
+    int totalQuestions = 0;
+    int totalQuizzes = dayQuizzes.length;
+
+    for (var quiz in dayQuizzes) {
+      totalCorrect += (quiz['correctAnswers'] ?? 0) as int;
+      totalQuestions += (quiz['totalQuestions'] ?? 0) as int;
+    }
+
+    double dayAccuracy =
+        totalQuestions > 0 ? (totalCorrect / totalQuestions * 100) : 0;
+
+    // Criteria for successful day:
+    // 1. At least 1 quiz completed
+    // 2. Overall accuracy >= 70% OR at least 2 quizzes with average accuracy >= 60%
+    if (totalQuizzes == 1) {
+      return dayAccuracy >= 70;
+    } else {
+      return dayAccuracy >= 60; // More lenient for multiple quizzes
+    }
+  }
+
+  // Get additional streak statistics
+  static Future<Map<String, dynamic>> _getStreakStatistics(
+      String userId) async {
+    try {
+      final snapshot = await _firestore
+          .collection('users')
+          .doc(userId)
+          .collection('quiz_history')
+          .orderBy('completedAt', descending: true)
+          .limit(365) // Get last year of data
+          .get();
+
+      if (snapshot.docs.isEmpty) {
+        return {
+          'longestStreak': 0,
+          'streaksThisWeek': 0,
+          'streaksThisMonth': 0,
+        };
+      }
+
+      // Group quizzes by day
+      Map<String, List<Map<String, dynamic>>> quizzesByDay = {};
+
+      for (var doc in snapshot.docs) {
+        final data = doc.data();
+        final completedAt = data['completedAt'];
+
+        if (completedAt == null) continue;
+
+        DateTime date;
+        if (completedAt is Timestamp) {
+          date = completedAt.toDate();
+        } else if (completedAt is DateTime) {
+          date = completedAt;
+        } else {
+          continue;
+        }
+
+        String dayKey =
+            '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+
+        if (!quizzesByDay.containsKey(dayKey)) {
+          quizzesByDay[dayKey] = [];
+        }
+
+        quizzesByDay[dayKey]!.add(data);
+      }
+
+      // Calculate longest streak ever
+      int longestStreak = 0;
+      int currentCalculatedStreak = 0;
+
+      List<String> allDays = quizzesByDay.keys.toList()..sort();
+
+      for (int i = 0; i < allDays.length; i++) {
+        String dayKey = allDays[i];
+        bool daySuccess = _isDaySuccessful(quizzesByDay[dayKey]!);
+
+        if (daySuccess) {
+          if (i == 0) {
+            currentCalculatedStreak = 1;
+          } else {
+            DateTime currentDay = DateTime.parse(dayKey);
+            DateTime previousDay = DateTime.parse(allDays[i - 1]);
+
+            if (currentDay.difference(previousDay).inDays == 1) {
+              currentCalculatedStreak++;
+            } else {
+              currentCalculatedStreak = 1;
+            }
+          }
+
+          if (currentCalculatedStreak > longestStreak) {
+            longestStreak = currentCalculatedStreak;
+          }
+        } else {
+          currentCalculatedStreak = 0;
+        }
+      }
+
+      // Calculate streaks this week and month
+      DateTime now = DateTime.now();
+      DateTime weekStart = now.subtract(Duration(days: now.weekday - 1));
+      DateTime monthStart = DateTime(now.year, now.month, 1);
+
+      int streaksThisWeek = 0;
+      int streaksThisMonth = 0;
+
+      for (String dayKey in quizzesByDay.keys) {
+        DateTime dayDate = DateTime.parse(dayKey);
+        bool daySuccess = _isDaySuccessful(quizzesByDay[dayKey]!);
+
+        if (daySuccess) {
+          if (dayDate.isAfter(weekStart) ||
+              dayDate.isAtSameMomentAs(weekStart)) {
+            streaksThisWeek++;
+          }
+          if (dayDate.isAfter(monthStart) ||
+              dayDate.isAtSameMomentAs(monthStart)) {
+            streaksThisMonth++;
+          }
+        }
+      }
+
+      return {
+        'longestStreak': longestStreak,
+        'streaksThisWeek': streaksThisWeek,
+        'streaksThisMonth': streaksThisMonth,
+      };
+    } catch (e) {
+      debugPrint('Error calculating streak statistics: $e');
+      return {
+        'longestStreak': 0,
+        'streaksThisWeek': 0,
+        'streaksThisMonth': 0,
+      };
     }
   }
 
