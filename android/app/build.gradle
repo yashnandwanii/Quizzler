@@ -24,7 +24,7 @@ if (flutterVersionName == null) {
 }
 
 android {
-    namespace = "com.yash.quizzler"
+    namespace = "com.yash.quizNight"
     compileSdkVersion 36
     ndkVersion flutter.ndkVersion
     
@@ -50,7 +50,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.yash.quizzler"
+        applicationId = "com.yash.quizNight"
         minSdkVersion flutter.minSdkVersion
         targetSdk = 34
         versionCode = flutterVersionCode.toInteger()
