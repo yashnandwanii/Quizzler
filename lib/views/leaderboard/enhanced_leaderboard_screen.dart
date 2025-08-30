@@ -11,9 +11,13 @@ class EnhancedLeaderboardScreen extends StatefulWidget {
       _EnhancedLeaderboardScreenState();
 }
 
-class _EnhancedLeaderboardScreenState extends State<EnhancedLeaderboardScreen> {
+class _EnhancedLeaderboardScreenState extends State<EnhancedLeaderboardScreen>
+    with AutomaticKeepAliveClientMixin {
   bool _isLoading = true;
   List<Map<String, dynamic>> _leaderboard = [];
+
+  @override
+  bool get wantKeepAlive => true; // This keeps the state alive
 
   @override
   void initState() {
@@ -39,6 +43,7 @@ class _EnhancedLeaderboardScreenState extends State<EnhancedLeaderboardScreen> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context); // Required for AutomaticKeepAliveClientMixin
     return Scaffold(
       backgroundColor: const Color(0xFFF5F5F5),
       body: SafeArea(

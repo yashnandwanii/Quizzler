@@ -8,6 +8,7 @@ import 'package:quizzler/repository/authentication_repository/authentication_rep
 import 'package:quizzler/repository/user_repository/user_repository.dart';
 import 'package:quizzler/services/achievements_service.dart';
 import 'package:quizzler/services/leaderboard_service.dart';
+import 'package:quizzler/services/coin_sync_service.dart';
 import 'package:quizzler/views/achievements/achievements_screen.dart';
 import 'package:quizzler/views/screens/settings_screen.dart';
 
@@ -18,11 +19,45 @@ class ProfilePage extends StatefulWidget {
   State<ProfilePage> createState() => _ProfilePageState();
 }
 
-class _ProfilePageState extends State<ProfilePage> {
+class _ProfilePageState extends State<ProfilePage>
+    with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true; // This keeps the state alive
+
+  // Key for refreshing user data
+  ValueNotifier<String> _refreshKey = ValueNotifier<String>('initial');
+
   @override
   void initState() {
     super.initState();
     _checkRetroactiveAchievements();
+    _initializeCoinSync();
+  }
+
+  // Initialize coin synchronization
+  void _initializeCoinSync() async {
+    final authRepo = Get.find<AuthenticationRepository>();
+    final userId = authRepo.firebaseUser.value?.uid;
+
+    if (userId != null) {
+      final coinSyncService = Get.find<CoinSyncService>();
+      await coinSyncService.refreshCoins(userId);
+    }
+  }
+
+  // Method to refresh user data when profile screen is focused
+  void _refreshUserData() {
+    setState(() {
+      _refreshKey.value = DateTime.now().millisecondsSinceEpoch.toString();
+    });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Refresh data when the profile screen comes into focus
+    _refreshUserData();
+    _initializeCoinSync(); // Also refresh coins when screen is focused
   }
 
   Future<void> _checkRetroactiveAchievements() async {
@@ -65,6 +100,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context); // Required for AutomaticKeepAliveClientMixin
     final authRepo = Get.find<AuthenticationRepository>();
     final userRepo = Get.find<UserRepository>();
     final userId = authRepo.firebaseUser.value?.uid;
@@ -77,57 +113,76 @@ class _ProfilePageState extends State<ProfilePage> {
 
     return Scaffold(
       backgroundColor: offwhite,
-      body: FutureBuilder<UserModel?>(
-        future: userRepo.getUserData(userId),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-
-          // Handle error or missing data by creating a default user
-          UserModel user;
-          if (snapshot.hasError || !snapshot.hasData || snapshot.data == null) {
-            debugPrint(
-                'Profile: User data not found or error occurred. Creating default user.');
-            // Create a default user with Firebase user info
-            final firebaseUser = authRepo.firebaseUser.value;
-            user = UserModel(
-              id: userId,
-              fullName: firebaseUser?.displayName ?? 'User',
-              email: firebaseUser?.email ?? 'user@example.com',
-              password: '', // Not needed for display
-              photoUrl: firebaseUser?.photoURL ?? '',
-              coins: 0,
-              rank: 0,
-            );
-
-            // Try to create the user document in Firestore in the background
-            Future.microtask(() async {
-              try {
-                await userRepo.createUser(user);
-                debugPrint(
-                    'Profile: Created missing user document for $userId');
-              } catch (e) {
-                debugPrint('Profile: Failed to create user document: $e');
+      body: ValueListenableBuilder<String>(
+        valueListenable: _refreshKey,
+        builder: (context, refreshKey, _) {
+          return FutureBuilder<UserModel?>(
+            key: ValueKey(
+                refreshKey), // This forces rebuild when refreshKey changes
+            future: userRepo.getUserData(userId),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
               }
-            });
-          } else {
-            user = snapshot.data!;
-          }
 
-          return SingleChildScrollView(
-            padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 40.h),
-            child: Column(
-              children: [
-                _buildProfileHeader(user),
-                SizedBox(height: 20.h),
-                _buildStats(user),
-                SizedBox(height: 20.h),
-                _buildAchievements(user),
-                SizedBox(height: 10.h),
-                _buildMenuList(context),
-              ],
-            ),
+              // Handle error or missing data by creating a default user
+              UserModel user;
+              if (snapshot.hasError ||
+                  !snapshot.hasData ||
+                  snapshot.data == null) {
+                debugPrint(
+                    'Profile: User data not found or error occurred. Creating default user.');
+                // Create a default user with Firebase user info
+                final firebaseUser = authRepo.firebaseUser.value;
+                user = UserModel(
+                  id: userId,
+                  fullName: firebaseUser?.displayName ?? 'User',
+                  email: firebaseUser?.email ?? 'user@example.com',
+                  password: '', // Not needed for display
+                  photoUrl: firebaseUser?.photoURL ?? '',
+                  coins: 0,
+                  rank: 0,
+                );
+
+                // Try to create the user document in Firestore in the background
+                Future.microtask(() async {
+                  try {
+                    await userRepo.createUser(user);
+                    debugPrint(
+                        'Profile: Created missing user document for $userId');
+                  } catch (e) {
+                    debugPrint('Profile: Failed to create user document: $e');
+                  }
+                });
+              } else {
+                user = snapshot.data!;
+              }
+
+              return RefreshIndicator(
+                color: Colors.deepPurple,
+                onRefresh: () async {
+                  _refreshUserData();
+                  // Wait a bit for the refresh to complete
+                  await Future.delayed(const Duration(milliseconds: 500));
+                },
+                child: SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  padding:
+                      EdgeInsets.symmetric(horizontal: 10.w, vertical: 40.h),
+                  child: Column(
+                    children: [
+                      _buildProfileHeader(user),
+                      SizedBox(height: 20.h),
+                      _buildStats(user),
+                      SizedBox(height: 20.h),
+                      _buildAchievements(user),
+                      SizedBox(height: 10.h),
+                      _buildMenuList(context),
+                    ],
+                  ),
+                ),
+              );
+            },
           );
         },
       ),
@@ -252,23 +307,90 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Widget _buildStats(UserModel user) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceAround,
-      children: [
-        _buildStatItem('Coins', user.coins.toString(), 'assets/icons/coin.png'),
-        FutureBuilder<int>(
-          future: LeaderboardService.getUserRank(user.id ?? ''),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return _buildStatItem(
-                  'Rank', '...', 'assets/icons/podium (1).png');
-            }
-            final rank = snapshot.data ?? user.rank;
-            return _buildStatItem(
-                'Rank', '#$rank', 'assets/icons/podium (1).png');
-          },
-        ),
-      ],
+    final coinSyncService = Get.find<CoinSyncService>();
+
+    return Container(
+      padding: EdgeInsets.all(16.w),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16.r),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Stats',
+                style: TextStyle(
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black87,
+                ),
+              ),
+              GestureDetector(
+                onTap: () async {
+                  if (user.id != null) {
+                    await coinSyncService.forceRefreshCoins(user.id!);
+                    _refreshUserData();
+                  }
+                },
+                child: Obx(() => Container(
+                      padding: EdgeInsets.all(6.w),
+                      decoration: BoxDecoration(
+                        color: Colors.deepPurple.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(8.r),
+                      ),
+                      child: coinSyncService.isLoading.value
+                          ? SizedBox(
+                              width: 18.w,
+                              height: 18.h,
+                              child: CircularProgressIndicator(
+                                color: Colors.deepPurple,
+                                strokeWidth: 2,
+                              ),
+                            )
+                          : Icon(
+                              Icons.refresh,
+                              color: Colors.deepPurple,
+                              size: 18.sp,
+                            ),
+                    )),
+              ),
+            ],
+          ),
+          SizedBox(height: 16.h),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              // Use real-time coin data from CoinSyncService
+              Obx(() => _buildStatItem(
+                  'Coins',
+                  coinSyncService.currentCoins.value.toString(),
+                  'assets/icons/coin.png')),
+              FutureBuilder<int>(
+                future: LeaderboardService.getUserRank(user.id ?? ''),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return _buildStatItem(
+                        'Rank', '...', 'assets/icons/podium (1).png');
+                  }
+                  final rank = snapshot.data ?? user.rank;
+                  return _buildStatItem(
+                      'Rank', '#$rank', 'assets/icons/podium (1).png');
+                },
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 

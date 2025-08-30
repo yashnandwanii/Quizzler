@@ -14,7 +14,11 @@ class QuizHistoryScreen extends StatefulWidget {
   State<QuizHistoryScreen> createState() => _QuizHistoryScreenState();
 }
 
-class _QuizHistoryScreenState extends State<QuizHistoryScreen> {
+class _QuizHistoryScreenState extends State<QuizHistoryScreen>
+    with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true; // This keeps the state alive
+
   List<Map<String, dynamic>> _quizHistory = [];
   Map<String, dynamic> _userStats = {};
   bool _isLoading = true;
@@ -109,6 +113,7 @@ class _QuizHistoryScreenState extends State<QuizHistoryScreen> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context); // Required for AutomaticKeepAliveClientMixin
     return Scaffold(
       backgroundColor: const Color(0xFFF5F5F5),
       body: SafeArea(

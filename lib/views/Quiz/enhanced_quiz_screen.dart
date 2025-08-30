@@ -464,7 +464,7 @@ class _EnhancedQuizScreenState extends State<EnhancedQuizScreen> {
         ),
         Expanded(
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.end,
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               // Timer display
               Container(

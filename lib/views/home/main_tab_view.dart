@@ -18,19 +18,31 @@ class MainTabView extends StatefulWidget {
 class _MainTabViewState extends State<MainTabView> {
   int currentIndex = 0;
 
-  final List<Widget> _screens = [
-    const HomeScreen(),
-    const CategoriesScreen(),
-    const EnhancedLeaderboardScreen(),
-    const QuizHistoryScreen(),
-    const ProfilePage(),
-  ];
+  // Use late initialization to create screens only once and keep them in memory
+  late final List<Widget> _screens;
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize screens once and keep them in memory
+    _screens = [
+      const HomeScreen(),
+      const CategoriesScreen(),
+      const EnhancedLeaderboardScreen(),
+      const QuizHistoryScreen(),
+      const ProfilePage(),
+    ];
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: _screens[currentIndex],
+      // Use IndexedStack to keep all screens in memory and preserve their state
+      body: IndexedStack(
+        index: currentIndex,
+        children: _screens,
+      ),
       bottomNavigationBar: CurvedNavigationBar(
         index: currentIndex,
         backgroundColor: Colors.white,

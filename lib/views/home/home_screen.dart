@@ -115,9 +115,13 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen>
+    with AutomaticKeepAliveClientMixin {
   String wish = 'Good Morning';
   List<Map<String, dynamic>> recentQuizzes = [];
+
+  @override
+  bool get wantKeepAlive => true; // This keeps the state alive
 
   @override
   void initState() {
@@ -503,6 +507,7 @@ Explanation: ${attempt['explanation'] ?? 'No explanation'}
 
   @override
   Widget build(BuildContext context) {
+    super.build(context); // Required for AutomaticKeepAliveClientMixin
     final authRepo = Get.find<AuthenticationRepository>();
     final userRepo = Get.find<UserRepository>();
     final userId = authRepo.firebaseUser.value?.uid;

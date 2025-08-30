@@ -189,12 +189,17 @@ class _EnhancedResultsScreenState extends State<EnhancedResultsScreen> {
                 const Icon(Icons.monetization_on,
                     color: Colors.white, size: 24),
                 SizedBox(width: 8.w),
-                Text(
-                  'You earned ${widget.coinsEarned} coins!',
-                  style: GoogleFonts.robotoMono(
-                    fontSize: 18.sp,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
+                Expanded(
+                  child: Text(
+                    'You earned ${widget.coinsEarned} coins!',
+                    style: GoogleFonts.robotoMono(
+                      fontSize: 18.sp,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
+                    softWrap: false,
                   ),
                 ),
               ],
